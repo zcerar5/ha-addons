@@ -60,7 +60,7 @@ jobs:
           COMMIT_LOG=$(echo "$COMMIT_LOG" | grep -v '^- Merge ' | sort -u)
 
           # Extract supported architectures from config.yaml
-          ARCHS=$(awk '/^arch:/{f=1;next} f && /^ *- /{gsub(/^ *- /,""); printf "%s`%s`", sep, $0; sep=", "} f && /^[^ ]/{exit}' open3e/config.yaml)
+          ARCHS=$(awk '/^arch:/{f=1;next} f && /^[^ ]/{exit} f && /^ *- /{gsub(/^ *- /,""); printf "%s`%s`", sep, $0; sep=", "}' open3e/config.yaml)
 
           MANUAL_NOTES="${{ inputs.manual_notes }}"
 
