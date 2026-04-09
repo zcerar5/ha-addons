@@ -8,12 +8,17 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: '0.6.1'
+        required: true
 
 # Migration to new Home Assistant Actions build process
 
 env:
   ARCHITECTURES: '["amd64", "aarch64"]'
   IMAGE_NAME: ha-addon-open3e
+  REGISTRY_PREFIX: docker.io/fleckem
 
 permissions:
   contents: read
@@ -25,16 +30,23 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v6
 
+      - name: Resolve tag
+        id: tag
+        run: |
+          TAG="${{ inputs.tag || github.event.release.tag_name }}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
       - name: Get build matrix
         id: matrix
-        context: "./open3e"
         uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
         with:
           architectures: ${{ env.ARCHITECTURES }}
           image-name: ${{ env.IMAGE_NAME }}
+          registry-prefix: ${{ env.REGISTRY_PREFIX }}
 
 
   build:
@@ -51,45 +63,39 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v3.4.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Build image
         uses: home-assistant/builder/actions/build-image@2026.03.2
         with:
           arch: ${{ matrix.arch }}
-          # container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          container-registry: "docker.io"
+          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
           context: "./open3e"
           image: ${{ matrix.image }}
           image-tags: |
-            ${{ github.event.release.tag_name }}
+            ${{ needs.init.outputs.tag }}
             latest
           push: "true"
-          version: ${{ github.event.release.tag_name }}
+          version: ${{ needs.init.outputs.tag }}
 
   manifest:
     name: Publish multi-arch manifest
     needs: [init, build]
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
-      packages: write # To push the manifest to GitHub Container Registry
+      id-token: write
+      packages: write
     steps:
-      - name: Login to DockerHub
-        uses: docker/login-action@v3.4.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Publish multi-arch manifest
         uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
         with:
           architectures: ${{ env.ARCHITECTURES }}
-          #container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          container-registry: "docker.io"
+          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
           image-name: ${{ env.IMAGE_NAME }}
+          registry-prefix: ${{ env.REGISTRY_PREFIX }}
           image-tags: |
-            ${{ github.event.release.tag_name }}
+            ${{ needs.init.outputs.tag }}
             latest
+
