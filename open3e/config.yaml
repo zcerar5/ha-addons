@@ -10,7 +10,7 @@ arch:
   - aarch64
 hassio_api: true
 host_network: true
-image: "fleckem/ha-addon-open3e-{arch}"
+image: "docker.io/fleckem/ha-addon-open3e"
 init: false
 options: {
   "configurations": {
