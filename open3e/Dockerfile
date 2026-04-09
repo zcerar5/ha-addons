@@ -1,4 +1,4 @@
-ARG BUILD_FROM
+ARG ghcr.io/home-assistant/base-python:3.14-alpine3.23
 FROM $BUILD_FROM
 
 
