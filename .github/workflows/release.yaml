@@ -1,0 +1,91 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'open3e/config.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Read version from config.yaml
+        id: version
+        run: |
+          VERSION=$(grep '^version:' open3e/config.yaml | awk '{print $2}')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Check if tag already exists
+        id: tag_check
+        run: |
+          if git tag --list | grep -qx "${{ steps.version.outputs.version }}"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get previous tag
+        id: prev_tag
+        if: steps.tag_check.outputs.exists == 'false'
+        run: |
+          PREV_TAG=$(git tag --sort=-version:refname | head -1)
+          echo "tag=${PREV_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes body
+        id: notes
+        if: steps.tag_check.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          PREV_TAG="${{ steps.prev_tag.outputs.tag }}"
+
+          if [ -z "$PREV_TAG" ]; then
+            COMMIT_LOG=$(git log --pretty=format:"- %s" | head -20)
+          else
+            COMMIT_LOG=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s")
+          fi
+
+          # Deduplicate and skip empty or merge commits
+          COMMIT_LOG=$(echo "$COMMIT_LOG" | grep -v '^- Merge ' | sort -u)
+
+          {
+            echo "body<<EOF"
+            echo "## Open3e Add-On v${VERSION}"
+            echo ""
+            echo "### Changes"
+            echo ""
+            if [ -z "$COMMIT_LOG" ]; then
+              echo "- Minor updates and improvements"
+            else
+              echo "$COMMIT_LOG"
+            fi
+            echo ""
+            echo "### Add-On Details"
+            echo ""
+            echo "| Property | Value |"
+            echo "| --- | --- |"
+            echo "| Version | \`${VERSION}\` |"
+            echo "| Add-On | Open3e |"
+            echo "| Supported Architectures | \`amd64\`, \`aarch64\`, \`armhf\` |"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release and tag
+        if: steps.tag_check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.version }}" \
+            --title "Open3e Add-On v${{ steps.version.outputs.version }}" \
+            --notes "${{ steps.notes.outputs.body }}" \
+            --latest

@@ -3,41 +3,79 @@
 # Name of the workflow
 name: Build HA Addon
 
-# Triggers the workflow on manual dispatch
-on: workflow_dispatch
+# Triggers the workflow on a published release or manual dispatch
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+# Migration to new Home Assistant Actions build process
+
+env:
+  ARCHITECTURES: '["amd64", "aarch64"]'
+  IMAGE_NAME: ha-addon-open3e
+
+permissions:
+  contents: read
 
 # Defines the steps that will run in this workflow
 jobs:
-  build:
+  init:
+    name: Initialize build
     runs-on: ubuntu-latest
-    name: Build ${{ matrix.arch }} open3e add-on
-    strategy:
-      matrix:
-        addon: ["open3e"]
-        arch: ["aarch64", "amd64", "armhf"]
-
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6
 
-      - name: Get information
-        id: info
-        uses: home-assistant/actions/helpers/info@master
+      - name: Get build matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
         with:
-          path: ./${{ matrix.addon }}
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: ${{ env.IMAGE_NAME }}
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v3.4.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Open3e add-on
-        if: contains(steps.info.outputs.architectures, matrix.arch)
-        uses: home-assistant/builder@2025.02.0
+  build:
+    name: Build ${{ matrix.arch }} image
+    needs: init
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build image
+        uses: home-assistant/builder/actions/build-image@2026.03.2
         with:
-          args: |
-            --${{ matrix.arch }} \
-            --target /data/${{ matrix.addon }} \
-            --image "ha-addon-open3e-${{ matrix.arch }}" \
-            --docker-hub fleckem
+          arch: ${{ matrix.arch }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ github.event.release.tag_name }}
+            latest
+          push: "true"
+          version: ${{ github.event.release.tag_name }}
+
+  manifest:
+    name: Publish multi-arch manifest
+    needs: [init, build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
+      packages: write # To push the manifest to GitHub Container Registry
+    steps:
+      - name: Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tags: |
+            ${{ github.event.release.tag_name }}
+            latest
