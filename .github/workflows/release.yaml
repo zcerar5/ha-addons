@@ -1,12 +1,12 @@
 name: Create Release
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'open3e/config.yaml'
   workflow_dispatch:
+    inputs:
+      manual_notes:
+        description: 'Additional notes to display above the Changes section (optional)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -48,6 +48,7 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           PREV_TAG="${{ steps.prev_tag.outputs.tag }}"
+          NOTES_FILE="/tmp/release_notes.md"
 
           if [ -z "$PREV_TAG" ]; then
             COMMIT_LOG=$(git log --pretty=format:"- %s" | head -20)
@@ -58,27 +59,28 @@ jobs:
           # Deduplicate and skip empty or merge commits
           COMMIT_LOG=$(echo "$COMMIT_LOG" | grep -v '^- Merge ' | sort -u)
 
-          {
-            echo "body<<EOF"
-            echo "## Open3e Add-On v${VERSION}"
-            echo ""
-            echo "### Changes"
-            echo ""
-            if [ -z "$COMMIT_LOG" ]; then
-              echo "- Minor updates and improvements"
-            else
-              echo "$COMMIT_LOG"
-            fi
-            echo ""
-            echo "### Add-On Details"
-            echo ""
-            echo "| Property | Value |"
-            echo "| --- | --- |"
-            echo "| Version | \`${VERSION}\` |"
-            echo "| Add-On | Open3e |"
-            echo "| Supported Architectures | \`amd64\`, \`aarch64\`, \`armhf\` |"
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
+          # Extract supported architectures from config.yaml
+          ARCHS=$(awk '/^arch:/{f=1;next} f && /^ *- /{gsub(/^ *- /,""); printf "%s`%s`", sep, $0; sep=", "} f && /^[^ ]/{exit}' open3e/config.yaml)
+
+          MANUAL_NOTES="${{ inputs.manual_notes }}"
+
+          # Write notes to a file to avoid shell backtick / special-char interpretation
+          printf '## Open3e Add-On v%s\n\n' "$VERSION" > "$NOTES_FILE"
+          if [ -n "$MANUAL_NOTES" ]; then
+            printf '%s\n\n' "$MANUAL_NOTES" >> "$NOTES_FILE"
+          fi
+          printf '### Changes\n\n' >> "$NOTES_FILE"
+          if [ -z "$COMMIT_LOG" ]; then
+            printf '- Minor updates and improvements\n' >> "$NOTES_FILE"
+          else
+            printf '%s\n' "$COMMIT_LOG" >> "$NOTES_FILE"
+          fi
+          printf '\n### Add-On Details\n\n| Property | Value |\n| --- | --- |\n' >> "$NOTES_FILE"
+          printf '| Version | `%s` |\n' "$VERSION" >> "$NOTES_FILE"
+          printf '| Add-On | Open3e |\n' >> "$NOTES_FILE"
+          printf '| Supported Architectures | %s |\n' "$ARCHS" >> "$NOTES_FILE"
+
+          echo "notes_file=${NOTES_FILE}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub release and tag
         if: steps.tag_check.outputs.exists == 'false'
@@ -87,5 +89,5 @@ jobs:
         run: |
           gh release create "${{ steps.version.outputs.version }}" \
             --title "Open3e Add-On v${{ steps.version.outputs.version }}" \
-            --notes "${{ steps.notes.outputs.body }}" \
+            --notes-file "${{ steps.notes.outputs.notes_file }}" \
             --latest
