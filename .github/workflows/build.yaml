@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: '0.6.1'
+        description: 'Tag to build'
         required: true
 
 # Migration to new Home Assistant Actions build process
