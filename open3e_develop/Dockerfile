@@ -6,7 +6,7 @@ RUN apk update && apk add --no-cache git iproute2
 RUN mkdir -p /data
 WORKDIR /data
 
-RUN pip install git+https://github.com/open3e/open3e.git@develop
+RUN pip install "open3e[web] @ git+https://github.com/open3e/open3e.git@develop"
 
 COPY rootfs /
 RUN chmod a+x /run.sh

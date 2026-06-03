@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.5-dev
+
+- Start the Open3e Web UI instead of the legacy CLI listener.
+- Expose the Web UI on port `5051`.
+- Install Open3e with its `web` dependencies.
+
 ## 0.6.4-dev
 
 - Added as a separate add-on variant that builds Open3e from the upstream `develop` branch.

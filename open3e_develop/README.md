@@ -3,6 +3,8 @@
 This variant installs Open3e from the upstream `develop` branch:
 https://github.com/open3e/open3e/tree/develop
 
+It starts the Open3e Web UI on port `5051`.
+
 Use at your own risk. Please share feedback about Open3e in the upstream discussion:
 https://github.com/open3e/open3e/discussions/216
 
@@ -24,7 +26,9 @@ Options:
 - `MQTT_FormatString`: leave the default option or check the Open3e documentation for valid options.
 - `MQTT_ClientID`: client ID used by the add-on in the MQTT broker.
 
-Startup of the Add-On, where initially the command open3e_depictsystem runs:
+Open the add-on Web UI from Home Assistant, or browse to `http://<home-assistant-host>:5051`.
+
+Startup of the Add-On:
 
 ![Startup](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e_develop/images/homeassistant-startup.jpg)
 

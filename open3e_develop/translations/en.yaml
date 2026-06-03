@@ -6,6 +6,9 @@ configuration:
       can:
         name: CAN interface
         description: Host CAN network interface connected to the E3 device.
+      Web_UI_Port:
+        name: Web UI port
+        description: Host port used by the Open3e Develop web interface.
       Listen_Topic:
         name: Listen topic
         description: MQTT topic where Open3e listens for commands.

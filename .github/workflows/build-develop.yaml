@@ -66,7 +66,7 @@ jobs:
           labels: |
             io.hass.type=app
             io.hass.name=Open3e Develop
-            io.hass.description=Connect to E3 Controls through CAN using Open3e develop
+            io.hass.description=Connect to E3 Controls through CAN using Open3e develop with Web UI
             io.hass.url=https://github.com/zcerar5/ha-addons/tree/main/open3e_develop
           push: "true"
           version: ${{ needs.init.outputs.tag }}
