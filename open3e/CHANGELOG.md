@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.4-dev
+
+- Build the add-on from the Open3e `develop` branch for testing.
+
 ## 0.6.3
 
 - Added current Home Assistant repository metadata.
