@@ -18,7 +18,7 @@ on:
 env:
   ARCHITECTURES: '["amd64", "aarch64"]'
   IMAGE_NAME: ha-addon-open3e
-  REGISTRY_PREFIX: docker.io/fleckem
+  REGISTRY_PREFIX: ghcr.io/zcerar5
 
 permissions:
   contents: read
@@ -67,14 +67,17 @@ jobs:
         uses: home-assistant/builder/actions/build-image@2026.03.2
         with:
           arch: ${{ matrix.arch }}
-          container-registry: "docker.io"
-          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           context: "./open3e"
           image: ${{ matrix.image }}
           image-tags: |
             ${{ needs.init.outputs.tag }}
             latest
+          labels: |
+            io.hass.type=app
+            io.hass.name=Open3e
+            io.hass.description=Connect to E3 Controls through CAN
+            io.hass.url=https://github.com/zcerar5/ha-addons/tree/main/open3e
           push: "true"
           version: ${{ needs.init.outputs.tag }}
 
@@ -90,12 +93,9 @@ jobs:
         uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
         with:
           architectures: ${{ env.ARCHITECTURES }}
-          container-registry: "docker.io"
-          container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-name: ${{ env.IMAGE_NAME }}
           registry-prefix: ${{ env.REGISTRY_PREFIX }}
           image-tags: |
             ${{ needs.init.outputs.tag }}
             latest
-
