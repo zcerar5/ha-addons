@@ -21,3 +21,9 @@ configuration:
       MQTT_ClientID:
         name: MQTT client ID
         description: Client ID used by Open3e when connecting to the MQTT broker.
+      MQTT_Publish_JSON:
+        name: Publish JSON
+        description: Publish each datapoint as one JSON message instead of split subtopics. Keep disabled for Home Assistant subfield sensors.
+      Auto_Select_Room_Datapoints:
+        name: Auto-select room datapoints
+        description: Automatically enable discovered room temperature and humidity datapoints at low polling priority.

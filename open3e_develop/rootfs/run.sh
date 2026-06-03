@@ -7,6 +7,8 @@ WEB_PORT="$(bashio::config 'configurations.Web_UI_Port')"
 TOPIC="$(bashio::config 'configurations.Server_Topic')"
 FORMATSTRING="$(bashio::config 'configurations.MQTT_FormatString')"
 CLIENTID="$(bashio::config 'configurations.MQTT_ClientID')"
+PUBLISH_JSON="$(bashio::config 'configurations.MQTT_Publish_JSON')"
+AUTO_ROOM_DPS="$(bashio::config 'configurations.Auto_Select_Room_Datapoints')"
 
 MQTT_HOST="$(bashio::services mqtt "host")"
 MQTT_USER="$(bashio::services mqtt "username")"
@@ -33,6 +35,8 @@ export OPEN3E_MQTT_PASSWORD="${MQTT_PASSWORD}"
 export OPEN3E_MQTT_TOPIC_PREFIX="${TOPIC}"
 export OPEN3E_MQTT_FORMAT_STRING="${FORMATSTRING}"
 export OPEN3E_MQTT_CLIENT_ID="${CLIENTID}"
+export OPEN3E_MQTT_PUBLISH_JSON="${PUBLISH_JSON}"
+export OPEN3E_AUTO_SELECT_ROOM_DATAPOINTS="${AUTO_ROOM_DPS}"
 
 python3 /seed-web-config.py
 

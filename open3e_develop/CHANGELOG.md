@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.6-dev
+
+- Match the default MQTT format to the Web UI Home Assistant discovery topics.
+- Default MQTT publishing to split subtopics for Home Assistant subfield sensors.
+- Add an option to auto-select discovered room temperature and humidity datapoints at low priority.
+
 ## 0.6.5-dev
 
 - Start the Open3e Web UI instead of the legacy CLI listener.

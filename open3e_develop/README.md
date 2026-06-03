@@ -23,10 +23,14 @@ Options:
 - `can`: should usually be `can0`; if not found, check the network interfaces on your Home Assistant host and adjust accordingly.
 - `Listen_Topic`: topic where the add-on listens for commands.
 - `Server_Topic`: topic where Open3e publishes data.
-- `MQTT_FormatString`: leave the default option or check the Open3e documentation for valid options.
+- `MQTT_FormatString`: leave the default option for Home Assistant discovery.
 - `MQTT_ClientID`: client ID used by the add-on in the MQTT broker.
+- `MQTT_Publish_JSON`: keep disabled for Home Assistant so complex datapoints are split into subtopics.
+- `Auto_Select_Room_Datapoints`: enables discovered room temperature and humidity datapoints at low priority.
 
 Open the add-on Web UI from Home Assistant, or browse to `http://<home-assistant-host>:5051`.
+
+After the first System Depiction scan, restart the add-on once so the room datapoint preset can apply to the discovered datapoints. Then publish Home Assistant discovery from the Web UI.
 
 Startup of the Add-On:
 
