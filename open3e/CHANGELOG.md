@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.4
+
+- Install Open3e from the upstream `develop` branch for the classic MQTT add-on.
+- Advertise ViCare/ZigBee room device current values for the Vdens profile so the Open3e HACS integration can create room temperature and humidity entities.
+
 ## 0.6.3
 
 - Added current Home Assistant repository metadata.

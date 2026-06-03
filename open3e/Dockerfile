@@ -6,7 +6,10 @@ RUN apk update && apk add --no-cache git iproute2
 RUN mkdir -p /data
 WORKDIR /data
 
-RUN pip install git+https://github.com/open3e/open3e.git
+RUN pip install "open3e @ git+https://github.com/open3e/open3e.git@develop"
+
+COPY patch-open3e-vdens.py /tmp/patch-open3e-vdens.py
+RUN python /tmp/patch-open3e-vdens.py
 
 COPY rootfs /
 RUN chmod a+x /run.sh
