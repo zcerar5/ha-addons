@@ -1,5 +1,5 @@
 ---
-version: 0.6.6-dev
+version: 0.6.7-dev
 slug: open3e_develop
 name: Open3e Develop
 description: Connect to E3 Controls through CAN using Open3e develop with Web UI
@@ -26,6 +26,7 @@ options:
     MQTT_FormatString: "{didNumber}_{didName}"
     MQTT_ClientID: open3e_develop
     MQTT_Publish_JSON: false
+    Auto_Select_HACS_Datapoints: true
     Auto_Select_Room_Datapoints: true
 privileged:
   - NET_ADMIN
@@ -38,6 +39,7 @@ schema:
     MQTT_FormatString: str
     MQTT_ClientID: str
     MQTT_Publish_JSON: bool
+    Auto_Select_HACS_Datapoints: bool
     Auto_Select_Room_Datapoints: bool
 services:
   - mqtt:need

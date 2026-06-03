@@ -22,11 +22,12 @@ The add-on starts the Open3e Web UI on port `5051`.
 | `MQTT_FormatString` | `{didNumber}_{didName}` | Format used to build MQTT entity topic names. This default matches the Web UI Home Assistant discovery topics. |
 | `MQTT_ClientID` | `open3e_develop` | MQTT client ID used by Open3e. |
 | `MQTT_Publish_JSON` | `false` | Keep disabled for Home Assistant so complex datapoints are published as split subtopics. |
+| `Auto_Select_HACS_Datapoints` | `true` | Automatically enable the base datapoints used by the Open3e HACS integration. |
 | `Auto_Select_Room_Datapoints` | `true` | Automatically enable discovered room temperature and humidity datapoints at low priority. |
 
 Open the Web UI from the add-on page or at `http://<home-assistant-host>:5051`.
 
-After running System Depiction for the first time, restart the add-on once so the room preset can apply to the discovered datapoints. Then publish Home Assistant discovery from the Web UI.
+After running System Depiction for the first time, restart the add-on once so the HACS and room presets can apply to the discovered datapoints. Then use the Web UI to apply Home Assistant defaults and publish Home Assistant discovery.
 
 ## Support
 

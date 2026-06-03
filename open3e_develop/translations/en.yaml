@@ -24,6 +24,9 @@ configuration:
       MQTT_Publish_JSON:
         name: Publish JSON
         description: Publish each datapoint as one JSON message instead of split subtopics. Keep disabled for Home Assistant subfield sensors.
+      Auto_Select_HACS_Datapoints:
+        name: Auto-select HACS datapoints
+        description: Automatically enable the base datapoints used by the Open3e HACS integration.
       Auto_Select_Room_Datapoints:
         name: Auto-select room datapoints
         description: Automatically enable discovered room temperature and humidity datapoints at low polling priority.

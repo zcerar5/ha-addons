@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.7-dev
+
+- Add an option to auto-select the base datapoints used by the Open3e HACS integration.
+- Keep the room datapoint preset for develop room-current temperature and humidity values.
+
 ## 0.6.6-dev
 
 - Match the default MQTT format to the Web UI Home Assistant discovery topics.

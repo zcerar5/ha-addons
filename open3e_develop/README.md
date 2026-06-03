@@ -26,11 +26,12 @@ Options:
 - `MQTT_FormatString`: leave the default option for Home Assistant discovery.
 - `MQTT_ClientID`: client ID used by the add-on in the MQTT broker.
 - `MQTT_Publish_JSON`: keep disabled for Home Assistant so complex datapoints are split into subtopics.
+- `Auto_Select_HACS_Datapoints`: enables the base datapoints used by the Open3e HACS integration.
 - `Auto_Select_Room_Datapoints`: enables discovered room temperature and humidity datapoints at low priority.
 
 Open the add-on Web UI from Home Assistant, or browse to `http://<home-assistant-host>:5051`.
 
-After the first System Depiction scan, restart the add-on once so the room datapoint preset can apply to the discovered datapoints. Then publish Home Assistant discovery from the Web UI.
+After the first System Depiction scan, restart the add-on once so the HACS and room datapoint presets can apply to the discovered datapoints. Then use the Web UI to apply Home Assistant defaults and publish Home Assistant discovery.
 
 Startup of the Add-On:
 
