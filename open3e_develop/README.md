@@ -14,7 +14,7 @@ It requires the Mosquitto MQTT broker to be installed in Home Assistant. The add
 
 Usually only the topics need to be adjusted when you do not want to use the defaults:
 
-![Configuration](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e-develop/images/homeassistant-configuration1.jpg)
+![Configuration](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e_develop/images/homeassistant-configuration1.jpg)
 
 Options:
 
@@ -26,12 +26,12 @@ Options:
 
 Startup of the Add-On, where initially the command open3e_depictsystem runs:
 
-![Startup](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e-develop/images/homeassistant-startup.jpg)
+![Startup](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e_develop/images/homeassistant-startup.jpg)
 
 
 Using the Add-On for Demo purposes with the MQTT-Explorer and sending a command to the Listen_Topic Endpoint and seeing the reply on the open3e Topic:
 
-![Running](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e-develop/images/homeassistant-running.jpg)
+![Running](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e_develop/images/homeassistant-running.jpg)
 
 
 

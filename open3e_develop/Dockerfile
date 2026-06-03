@@ -37,7 +37,7 @@ LABEL \
     org.opencontainers.image.licenses="Apache License 2.0" \
     org.opencontainers.image.url="https://github.com/zcerar5/ha-addons" \
     org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
-    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/open3e-develop/DOCS.md" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/open3e_develop/DOCS.md" \
     org.opencontainers.image.created=${BUILD_DATE} \
     org.opencontainers.image.revision=${BUILD_REF} \
     org.opencontainers.image.version=${BUILD_VERSION}
