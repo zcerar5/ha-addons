@@ -7,7 +7,7 @@ Note: the ARMHF image was removed because it is no longer supported by Home Assi
 
 This add-on connects to a USB CAN adapter plugged into the Home Assistant device. It runs the Open3e CAN-to-MQTT application to read and potentially write to Viessmann E3 platform devices such as heat pumps, ventilation systems, and solar inverters.
 
-This fork uses Open3e from upstream `develop` for the classic MQTT listener and exposes ViCare/ZigBee room device current values for the Vdens profile, so the Open3e HACS integration can categorize room temperature and humidity entities.
+This fork uses Open3e from upstream `develop` for the classic MQTT listener and exposes ViCare/ZigBee room device current values for the Vitocal/Vcal and Vitodens/Vdens profiles, so the Open3e HACS integration can categorize room temperature and humidity entities.
 
 It requires the Mosquitto MQTT broker to be installed in Home Assistant. The add-on uses the Home Assistant Supervisor MQTT service information to publish and subscribe to data from the CAN adapter.
 

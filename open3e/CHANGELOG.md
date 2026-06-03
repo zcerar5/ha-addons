@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.5
+
+- Advertise ViCare/ZigBee room device current values for Vitocal/Vcal as well as Vitodens/Vdens profiles.
+- Refresh the generated Open3e device description once so existing add-on installs can expose newly supported room datapoints.
+
 ## 0.6.4
 
 - Install Open3e from the upstream `develop` branch for the classic MQTT add-on.

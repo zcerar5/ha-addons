@@ -18,7 +18,7 @@
 
 The first start may take longer because `open3e_depictSystem` creates `/data/devices.json`.
 
-This fork installs Open3e from upstream `develop` for the classic MQTT add-on and exposes ViCare/ZigBee room device current values in the Vdens profile. That lets the Open3e HACS integration create room temperature and humidity entities when those datapoints are present on the bus.
+This fork installs Open3e from upstream `develop` for the classic MQTT add-on and exposes ViCare/ZigBee room device current values in the Vitocal/Vcal and Vitodens/Vdens profiles. That lets the Open3e HACS integration create room temperature and humidity entities when those datapoints are present on the bus.
 
 ## Support
 
