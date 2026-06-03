@@ -28,16 +28,10 @@ ip link | grep $CAN
 
 bashio::log.info "Preparing to start...checking for devices.json"
 
-ROOM_DID_DISCOVERY_MARKER="/data/.open3e-room-dids-0.6.5"
-
-if ! test -f /data/devices.json || ! test -f "$ROOM_DID_DISCOVERY_MARKER"; then
+if ! test -f /data/devices.json; then
    bashio::log.info "Running open3e_depictSystem -c $CAN ... This may take a while"
    cd /data
-   if open3e_depictSystem -c $CAN; then
-      touch "$ROOM_DID_DISCOVERY_MARKER"
-   else
-      bashio::log.error "open3e_depictSystem failed; continuing with existing devices.json if present"
-   fi
+   open3e_depictSystem -c $CAN
 fi
 
 bashio::log.info "Starting Open3e... open3e --can $CAN --mqtt $MQTT_HOST:1883:$TOPIC --mqttuser redacted! --mqttformatstring $FORMATSTRING --mqttclientid $CLIENTID --listen $LISTENTOPIC --config /data/devices.json"

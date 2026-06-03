@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.6
+
+- Keep Open3e discovery generation unchanged; uninstalling and reinstalling the add-on can regenerate `/data/devices.json` when needed.
+
 ## 0.6.5
 
 - Advertise ViCare/ZigBee room device current values for Vitocal/Vcal as well as Vitodens/Vdens profiles.
