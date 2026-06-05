@@ -1,6 +1,6 @@
 # Open3e Add-on Documentation
 
-This add-on installs Open3e from the upstream `develop` branch. By default it starts the Open3e Web UI on port `5051` and also runs the legacy Open3e MQTT listener used by the Open3e HACS integration.
+This add-on installs Open3e from the upstream `develop` branch. By default it starts the Open3e Web UI on port `5051` and lets the Web UI control CAN polling and MQTT publishing.
 
 ## Requirements
 
@@ -13,7 +13,8 @@ This add-on installs Open3e from the upstream `develop` branch. By default it st
 | Option | Default | Description |
 | --- | --- | --- |
 | `can` | `can0` | CAN interface used to communicate with the E3 device. |
-| `Web_UI_Enabled` | `true` | Start Open3e Web UI in addition to the legacy MQTT listener. |
+| `Web_UI_Enabled` | `true` | Start the Open3e Web UI. |
+| `Controller_Mode` | `webui` | `webui` lets Open3e Web UI control CAN polling and MQTT publishing. `open3e-ha` starts the legacy MQTT command listener for the Open3e HACS integration and keeps Web UI passive. |
 | `Web_UI_Port` | `5051` | Port used by the Open3e Web UI. |
 | `Listen_Topic` | `open3e/cmnd` | MQTT topic where the legacy Open3e listener receives commands from the Open3e HACS integration. |
 | `Server_Topic` | `open3e` | MQTT topic where Open3e publishes data. |
@@ -23,9 +24,13 @@ This add-on installs Open3e from the upstream `develop` branch. By default it st
 | `Auto_Select_HACS_Datapoints` | `false` | Web UI mode setting. Preselect the base datapoints used by the Open3e HACS integration. Disabled by default so Open3e HACS remains the polling controller. |
 | `Auto_Select_Room_Datapoints` | `false` | Web UI mode setting. Preselect discovered room temperature and humidity datapoints. Disabled by default so Open3e HACS remains the polling controller. |
 
-The Open3e HACS integration requests system information and feature values through `open3e/cmnd`, as with the original add-on. This request-driven path remains active even when the Web UI is enabled.
+## Controller modes
 
-Open the Web UI from the add-on page or at `http://<home-assistant-host>:5051`. If you use the Web UI to enable polling or publish Home Assistant discovery, it becomes an additional controller alongside Open3e HACS and can create duplicate entities.
+`webui` is the default mode. The Open3e Web UI owns CAN access, polling selection, MQTT publishing, and optional Home Assistant discovery.
+
+`open3e-ha` is the compatibility mode for the Open3e HACS integration. The add-on starts the legacy `open3e --listen open3e/cmnd` MQTT listener, so Open3e HACS requests system information and feature values through `open3e/cmnd`, as with the original add-on. In this mode the Web UI still opens on port `5051`, but the add-on clears Web UI CAN and MQTT settings so it does not become a second polling controller.
+
+Open the Web UI from the add-on page or at `http://<home-assistant-host>:5051`.
 
 This fork exposes ViCare/ZigBee room device current values in the Vitocal/Vcal and Vitodens/Vdens profiles. That lets Home Assistant create room temperature and humidity entities when those datapoints are present on the bus.
 
