@@ -1,0 +1,20 @@
+configuration:
+  configurations:
+    name: Open3e settings
+    description: Configure the CAN interface and MQTT topics used by Open3e.
+    fields:
+      can:
+        name: CAN interface
+        description: Host CAN network interface connected to the E3 device.
+      Listen_Topic:
+        name: Listen topic
+        description: MQTT topic where Open3e listens for commands.
+      Server_Topic:
+        name: Server topic
+        description: MQTT topic where Open3e publishes data.
+      MQTT_FormatString:
+        name: MQTT format string
+        description: Format used to build MQTT entity topic names.
+      MQTT_ClientID:
+        name: MQTT client ID
+        description: Client ID used by Open3e when connecting to the MQTT broker.
