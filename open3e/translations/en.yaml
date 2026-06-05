@@ -8,7 +8,7 @@ configuration:
         description: Host CAN network interface connected to the E3 device.
       Web_UI_Enabled:
         name: Enable Web UI mode
-        description: Run Open3e Web UI instead of the legacy MQTT listener used by the Open3e HACS integration.
+        description: Start Open3e Web UI in addition to the legacy MQTT listener used by the Open3e HACS integration.
       Web_UI_Port:
         name: Web UI port
         description: Port used by Open3e Web UI when Web UI mode is enabled.
@@ -29,7 +29,7 @@ configuration:
         description: Publish complex values as JSON when Web UI mode is enabled.
       Auto_Select_HACS_Datapoints:
         name: Auto-select HACS datapoints
-        description: Enable the base datapoints used by the Open3e HACS integration when Web UI mode is enabled.
+        description: In Web UI mode, preselect the base datapoints used by the Open3e HACS integration.
       Auto_Select_Room_Datapoints:
         name: Auto-select room datapoints
-        description: Enable discovered room temperature and humidity datapoints when Web UI mode is enabled.
+        description: In Web UI mode, preselect discovered room temperature and humidity datapoints.
