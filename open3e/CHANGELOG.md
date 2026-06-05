@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.7
+
+- Start the Open3e Web UI on port `5051` from the main `open3e` add-on.
+- Install Open3e with its `web` dependencies from upstream `develop`.
+- Seed Web UI CAN, MQTT, HACS datapoint, and room datapoint settings from Home Assistant add-on options.
+
 ## 0.6.6
 
 - Keep Open3e discovery generation unchanged; uninstalling and reinstalling the add-on can regenerate `/data/devices.json` when needed.

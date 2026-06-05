@@ -5,9 +5,9 @@ https://github.com/open3e/open3e/discussions/216
 
 Note: the ARMHF image was removed because it is no longer supported by Home Assistant Python base images.
 
-This add-on connects to a USB CAN adapter plugged into the Home Assistant device. It runs the Open3e CAN-to-MQTT application to read and potentially write to Viessmann E3 platform devices such as heat pumps, ventilation systems, and solar inverters.
+This add-on connects to a USB CAN adapter plugged into the Home Assistant device. It runs the Open3e Web UI and CAN-to-MQTT publisher to read and potentially write to Viessmann E3 platform devices such as heat pumps, ventilation systems, and solar inverters.
 
-This fork uses Open3e from upstream `develop` for the classic MQTT listener and exposes ViCare/ZigBee room device current values for the Vitocal/Vcal and Vitodens/Vdens profiles, so the Open3e HACS integration can categorize room temperature and humidity entities.
+This fork uses Open3e from upstream `develop` with its Web UI and exposes ViCare/ZigBee room device current values for the Vitocal/Vcal and Vitodens/Vdens profiles, so Home Assistant can categorize room temperature and humidity entities.
 
 It requires the Mosquitto MQTT broker to be installed in Home Assistant. The add-on uses the Home Assistant Supervisor MQTT service information to publish and subscribe to data from the CAN adapter.
 
@@ -18,12 +18,20 @@ Usually only the topics need to be adjusted when you do not want to use the defa
 Options:
 
 - `can`: should usually be `can0`; if not found, check the network interfaces on your Home Assistant host and adjust accordingly.
-- `Listen_Topic`: topic where the add-on listens for commands.
+- `Web_UI_Port`: port used by the Open3e Web UI.
+- `Listen_Topic`: legacy MQTT command topic kept for existing add-on configuration. The Web UI uses Home Assistant discovery command topics.
 - `Server_Topic`: topic where Open3e publishes data.
-- `MQTT_FormatString`: leave the default option or check the Open3e documentation for valid options.
+- `MQTT_FormatString`: leave the default option for Home Assistant discovery.
 - `MQTT_ClientID`: client ID used by the add-on in the MQTT broker.
+- `MQTT_Publish_JSON`: keep disabled for Home Assistant so complex datapoints are split into subtopics.
+- `Auto_Select_HACS_Datapoints`: enables the base datapoints used by the Open3e HACS integration.
+- `Auto_Select_Room_Datapoints`: enables discovered room temperature and humidity datapoints at low priority.
 
-Startup of the Add-On, where initially the command open3e_depictsystem runs:
+Open the add-on Web UI from Home Assistant, or browse to `http://<home-assistant-host>:5051`.
+
+After the first System Depiction scan, restart the add-on once so the HACS and room datapoint presets can apply to the discovered datapoints. Then use the Web UI to apply Home Assistant defaults and publish Home Assistant discovery.
+
+Startup of the add-on:
 
 ![Startup](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e/images/homeassistant-startup.jpg)
 
