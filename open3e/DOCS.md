@@ -32,6 +32,8 @@ This add-on installs Open3e from the upstream `develop` branch. By default it st
 
 Open the Web UI from the add-on page or at `http://<home-assistant-host>:5051`.
 
+If `devices.json` and generated `Open3Edatapoints_*.py` files already exist in `/data`, the add-on imports them into the Web UI database during startup. That keeps discovered ECUs and datapoints visible after switching between controller modes.
+
 ## Web UI Terminal
 
 The Web UI includes a restricted Terminal page for Open3e CLI tools. It runs commands from `/data` inside the add-on container and allows only `open3e`, `open3e_depictSystem`, `open3e_dids2json`, `open3e_dids2md`, and `open3e_topology`.
