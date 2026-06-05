@@ -5,6 +5,12 @@ name: Build HA Addon
 
 # Triggers the workflow on a published release or manual dispatch
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "open3e/**"
+      - ".github/workflows/build.yaml"
   release:
     types: [published]
   workflow_dispatch:
@@ -36,8 +42,14 @@ jobs:
 
       - name: Resolve tag
         id: tag
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          TAG="${{ inputs.tag || github.event.release.tag_name }}"
+          TAG="${INPUT_TAG:-$RELEASE_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG="$(grep '^version:' open3e/config.yaml | awk '{print $2}')"
+          fi
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
       - name: Get build matrix
