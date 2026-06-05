@@ -33,43 +33,63 @@ if [ -n "${CAN}" ]; then
   ip link set up "${CAN}" 2>/dev/null || true
 fi
 
-if [ "${WEB_ENABLED}" != "true" ]; then
-  bashio::log.info "Preparing legacy Open3e MQTT listener mode"
+WEB_PID=""
+LEGACY_PID=""
 
-  if ! test -f /data/devices.json; then
-    bashio::log.info "Running open3e_depictSystem -c ${CAN} ... This may take a while"
-    cd /data
-    open3e_depictSystem -c "${CAN}"
+stop_children() {
+  bashio::log.info "Stopping Open3e processes"
+  if [ -n "${LEGACY_PID}" ]; then
+    kill "${LEGACY_PID}" 2>/dev/null || true
   fi
+  if [ -n "${WEB_PID}" ]; then
+    kill "${WEB_PID}" 2>/dev/null || true
+  fi
+}
 
-  bashio::log.info "Starting Open3e legacy listener: topic=${TOPIC}, listen=${LISTENTOPIC}"
+trap stop_children TERM INT
+
+if [ "${WEB_ENABLED}" = "true" ]; then
+  export OPEN3E_WEB_PORT="${WEB_PORT}"
+  export OPEN3E_CAN_INTERFACE="${CAN}"
+  export OPEN3E_CAN_BITRATE="250000"
+  export OPEN3E_MQTT_HOST="${MQTT_HOST}"
+  export OPEN3E_MQTT_PORT="1883"
+  export OPEN3E_MQTT_USER="${MQTT_USER}"
+  export OPEN3E_MQTT_PASSWORD="${MQTT_PASSWORD}"
+  export OPEN3E_MQTT_TOPIC_PREFIX="${TOPIC}"
+  export OPEN3E_MQTT_FORMAT_STRING="${FORMATSTRING}"
+  export OPEN3E_MQTT_CLIENT_ID="${CLIENTID}"
+  export OPEN3E_MQTT_PUBLISH_JSON="${PUBLISH_JSON}"
+  export OPEN3E_AUTO_SELECT_HACS_DATAPOINTS="${AUTO_HACS_DPS}"
+  export OPEN3E_AUTO_SELECT_ROOM_DATAPOINTS="${AUTO_ROOM_DPS}"
+
+  python3 /seed-web-config.py
+
+  bashio::log.info "Starting Open3e Web UI on port ${WEB_PORT}"
   cd /data
-  exec open3e \
-    --can "${CAN}" \
-    --mqtt "${MQTT_HOST}:1883:${TOPIC}" \
-    --mqttuser "${MQTT_USER}:${MQTT_PASSWORD}" \
-    --mqttformatstring "${FORMATSTRING}" \
-    --mqttclientid "${CLIENTID}" \
-    --listen "${LISTENTOPIC}" \
-    --config /data/devices.json
+  open3e-web &
+  WEB_PID="$!"
 fi
 
-export OPEN3E_WEB_PORT="${WEB_PORT}"
-export OPEN3E_CAN_INTERFACE="${CAN}"
-export OPEN3E_CAN_BITRATE="250000"
-export OPEN3E_MQTT_HOST="${MQTT_HOST}"
-export OPEN3E_MQTT_PORT="1883"
-export OPEN3E_MQTT_USER="${MQTT_USER}"
-export OPEN3E_MQTT_PASSWORD="${MQTT_PASSWORD}"
-export OPEN3E_MQTT_TOPIC_PREFIX="${TOPIC}"
-export OPEN3E_MQTT_FORMAT_STRING="${FORMATSTRING}"
-export OPEN3E_MQTT_CLIENT_ID="${CLIENTID}"
-export OPEN3E_MQTT_PUBLISH_JSON="${PUBLISH_JSON}"
-export OPEN3E_AUTO_SELECT_HACS_DATAPOINTS="${AUTO_HACS_DPS}"
-export OPEN3E_AUTO_SELECT_ROOM_DATAPOINTS="${AUTO_ROOM_DPS}"
+if ! test -f /data/devices.json; then
+  bashio::log.info "Running open3e_depictSystem -c ${CAN} ... This may take a while"
+  cd /data
+  open3e_depictSystem -c "${CAN}"
+fi
 
-python3 /seed-web-config.py
-
-bashio::log.info "Starting Open3e Web UI on port ${WEB_PORT}"
+bashio::log.info "Starting Open3e legacy listener: topic=${TOPIC}, listen=${LISTENTOPIC}"
 cd /data
-exec open3e-web
+open3e \
+  --can "${CAN}" \
+  --mqtt "${MQTT_HOST}:1883:${TOPIC}" \
+  --mqttuser "${MQTT_USER}:${MQTT_PASSWORD}" \
+  --mqttformatstring "${FORMATSTRING}" \
+  --mqttclientid "${CLIENTID}" \
+  --listen "${LISTENTOPIC}" \
+  --config /data/devices.json &
+LEGACY_PID="$!"
+
+wait "${LEGACY_PID}"
+STATUS="$?"
+stop_children
+exit "${STATUS}"
