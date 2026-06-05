@@ -32,6 +32,12 @@ This add-on installs Open3e from the upstream `develop` branch. By default it st
 
 Open the Web UI from the add-on page or at `http://<home-assistant-host>:5051`.
 
+## Web UI Terminal
+
+The Web UI includes a restricted Terminal page for Open3e CLI tools. It runs commands from `/data` inside the add-on container and allows only `open3e`, `open3e_depictSystem`, `open3e_dids2json`, `open3e_dids2md`, and `open3e_topology`.
+
+It does not expose a general-purpose Linux shell. Shell features such as pipes, redirects, command chaining, and arbitrary commands are intentionally unavailable.
+
 This fork exposes ViCare/ZigBee room device current values in the Vitocal/Vcal and Vitodens/Vdens profiles. That lets Home Assistant create room temperature and humidity entities when those datapoints are present on the bus.
 
 ## Support
