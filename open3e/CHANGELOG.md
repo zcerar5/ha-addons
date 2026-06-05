@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.9
+
+- Default back to the legacy Open3e MQTT listener so the Open3e HACS integration controls which datapoints are requested.
+- Add `Web_UI_Enabled` to switch explicitly into Open3e Web UI mode.
+- Restore the legacy default MQTT format string for HACS compatibility.
+
 ## 0.6.8
 
 - Build the add-on locally from the Dockerfile instead of pulling a prebuilt GHCR image.
