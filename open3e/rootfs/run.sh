@@ -1,9 +1,11 @@
 #!/usr/bin/with-contenv bashio
 
-bashio::log.info "Preparing Open3e Web UI"
+bashio::log.info "Preparing Open3e"
 
 CAN="$(bashio::config 'configurations.can')"
+WEB_ENABLED="$(bashio::config 'configurations.Web_UI_Enabled')"
 WEB_PORT="$(bashio::config 'configurations.Web_UI_Port')"
+LISTENTOPIC="$(bashio::config 'configurations.Listen_Topic')"
 TOPIC="$(bashio::config 'configurations.Server_Topic')"
 FORMATSTRING="$(bashio::config 'configurations.MQTT_FormatString')"
 CLIENTID="$(bashio::config 'configurations.MQTT_ClientID')"
@@ -16,8 +18,10 @@ MQTT_USER="$(bashio::services mqtt "username")"
 MQTT_PASSWORD="$(bashio::services mqtt "password")"
 
 bashio::log.info "Web UI port: ${WEB_PORT}"
+bashio::log.info "Web UI enabled: ${WEB_ENABLED}"
 bashio::log.info "CAN interface: ${CAN}"
 bashio::log.info "MQTT host: ${MQTT_HOST}"
+bashio::log.info "MQTT listen topic: ${LISTENTOPIC}"
 bashio::log.info "MQTT topic prefix: ${TOPIC}"
 bashio::log.info "MQTT format string: ${FORMATSTRING}"
 bashio::log.info "MQTT client ID: ${CLIENTID}"
@@ -27,6 +31,27 @@ if [ -n "${CAN}" ]; then
   ip link set down "${CAN}" 2>/dev/null || true
   ip link set "${CAN}" type can bitrate 250000 2>/dev/null || true
   ip link set up "${CAN}" 2>/dev/null || true
+fi
+
+if [ "${WEB_ENABLED}" != "true" ]; then
+  bashio::log.info "Preparing legacy Open3e MQTT listener mode"
+
+  if ! test -f /data/devices.json; then
+    bashio::log.info "Running open3e_depictSystem -c ${CAN} ... This may take a while"
+    cd /data
+    open3e_depictSystem -c "${CAN}"
+  fi
+
+  bashio::log.info "Starting Open3e legacy listener: topic=${TOPIC}, listen=${LISTENTOPIC}"
+  cd /data
+  exec open3e \
+    --can "${CAN}" \
+    --mqtt "${MQTT_HOST}:1883:${TOPIC}" \
+    --mqttuser "${MQTT_USER}:${MQTT_PASSWORD}" \
+    --mqttformatstring "${FORMATSTRING}" \
+    --mqttclientid "${CLIENTID}" \
+    --listen "${LISTENTOPIC}" \
+    --config /data/devices.json
 fi
 
 export OPEN3E_WEB_PORT="${WEB_PORT}"
