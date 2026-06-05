@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Seed Open3e Web UI settings from Home Assistant add-on options."""
 
+import importlib.util
+import json
 import os
 import sqlite3
+from pathlib import Path
 
 DEFAULT_MQTT_FORMAT = "{didNumber}_{didName}"
 LEGACY_ADDON_MQTT_FORMAT = "{device}_{ecuAddr:03X}_{didNumber}_{didName}"
@@ -42,6 +45,51 @@ MIXER_FIELDS = (
     ("Maximum", "temperature", "\u00b0C"),
     ("Average", "temperature", "\u00b0C"),
 )
+WEB_TABLES = (
+    """
+    CREATE TABLE IF NOT EXISTS ecus (
+        address     INTEGER PRIMARY KEY,
+        name        TEXT    NOT NULL,
+        device_prop TEXT,
+        dp_list     TEXT
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS datapoints (
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        ecu_address  INTEGER NOT NULL REFERENCES ecus(address) ON DELETE CASCADE,
+        did          INTEGER NOT NULL,
+        name         TEXT    NOT NULL,
+        codec        TEXT,
+        poll_priority INTEGER NOT NULL DEFAULT 0,
+        poll_enabled  INTEGER NOT NULL DEFAULT 0,
+        unit         TEXT,
+        description  TEXT,
+        UNIQUE(ecu_address, did)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS ha_entities (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        dp_id       INTEGER NOT NULL REFERENCES datapoints(id) ON DELETE CASCADE,
+        entity_type TEXT    NOT NULL,
+        unique_id   TEXT    NOT NULL UNIQUE,
+        name        TEXT,
+        device_class TEXT,
+        unit        TEXT,
+        enabled     INTEGER NOT NULL DEFAULT 1
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS mqtt_mappings (
+        id      INTEGER PRIMARY KEY AUTOINCREMENT,
+        dp_id   INTEGER NOT NULL REFERENCES datapoints(id) ON DELETE CASCADE,
+        topic   TEXT    NOT NULL,
+        enabled INTEGER NOT NULL DEFAULT 1,
+        UNIQUE(dp_id)
+    )
+    """,
+)
 
 
 def set_setting(cursor, key, value):
@@ -65,6 +113,11 @@ def bool_setting(value, default=False):
     if value is None or value == "":
         return "1" if default else "0"
     return "1" if str(value).lower() in ("1", "true", "yes", "on") else "0"
+
+
+def ensure_web_tables(cursor):
+    for statement in WEB_TABLES:
+        cursor.execute(statement)
 
 
 def table_exists(cursor, table):
@@ -96,6 +149,83 @@ def humanize(name):
     if current:
         parts.append(current)
     return " ".join(parts)
+
+
+def sync_depiction_results(cursor, data_dir="/data"):
+    devices_path = Path(data_dir) / "devices.json"
+    if not devices_path.is_file():
+        return 0, 0
+
+    with devices_path.open("r") as devices_file:
+        devices = json.load(devices_file)
+
+    try:
+        import open3e.Open3Edatapoints as general_datapoints
+        general_dids = dict(general_datapoints.dataIdentifiers.get("dids", {}))
+    except Exception:
+        general_dids = {}
+
+    total_datapoints = 0
+    for device_key, config in devices.items():
+        raw_addr = config["tx"]
+        ecu_address = int(raw_addr, 16) if isinstance(raw_addr, str) else int(raw_addr)
+        dp_list = config.get("dpList", "")
+        device_prop = config.get("prop", "")
+        ecu_name = device_prop or device_key
+
+        cursor.execute(
+            """
+            INSERT INTO ecus (address, name, device_prop, dp_list)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(address) DO UPDATE SET
+                name = excluded.name,
+                device_prop = excluded.device_prop,
+                dp_list = excluded.dp_list
+            """,
+            (ecu_address, ecu_name, device_prop, dp_list),
+        )
+
+        dp_path = Path(data_dir) / dp_list
+        if not dp_list or not dp_path.is_file():
+            continue
+
+        try:
+            module_name = "open3e_depiction_{}".format(
+                dp_path.name.replace(".", "_").replace("-", "_")
+            )
+            spec = importlib.util.spec_from_file_location(module_name, dp_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            dids = module.dataIdentifiers.get("dids", {})
+        except Exception as exc:
+            print("Could not load {}: {}".format(dp_path, exc), flush=True)
+            continue
+
+        for did, codec in dids.items():
+            did_number = int(did)
+            if codec is None:
+                codec = general_dids.get(did_number)
+
+            if codec is None:
+                name = "DID_{}".format(did_number)
+                codec_name = "RawCodec"
+            else:
+                name = getattr(codec, "id", "DID_{}".format(did_number))
+                codec_name = type(codec).__name__
+
+            cursor.execute(
+                """
+                INSERT INTO datapoints (ecu_address, did, name, codec)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(ecu_address, did) DO UPDATE SET
+                    name = excluded.name,
+                    codec = excluded.codec
+                """,
+                (ecu_address, did_number, name, codec_name),
+            )
+            total_datapoints += 1
+
+    return len(devices), total_datapoints
 
 
 def apply_room_datapoint_preset(cursor):
@@ -180,7 +310,17 @@ try:
         """
     )
 
+    ensure_web_tables(cursor)
     set_setting(cursor, "web_port", os.environ.get("OPEN3E_WEB_PORT", "5051"))
+
+    devices_loaded, datapoints_loaded = sync_depiction_results(cursor)
+    if devices_loaded:
+        print(
+            "Loaded depiction into Web UI DB: {} device(s), {} datapoint(s)".format(
+                devices_loaded, datapoints_loaded
+            ),
+            flush=True,
+        )
 
     if bool_setting(os.environ.get("OPEN3E_WEB_PASSIVE"), default=False) == "1":
         for key in (
