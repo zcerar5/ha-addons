@@ -57,6 +57,10 @@ def set_setting(cursor, key, value):
     )
 
 
+def clear_setting(cursor, key):
+    cursor.execute("DELETE FROM settings WHERE key = ?", (key,))
+
+
 def bool_setting(value, default=False):
     if value is None or value == "":
         return "1" if default else "0"
@@ -177,6 +181,25 @@ try:
     )
 
     set_setting(cursor, "web_port", os.environ.get("OPEN3E_WEB_PORT", "5051"))
+
+    if bool_setting(os.environ.get("OPEN3E_WEB_PASSIVE"), default=False) == "1":
+        for key in (
+            "can_interface",
+            "can_bitrate",
+            "mqtt_host",
+            "mqtt_port",
+            "mqtt_user",
+            "mqtt_password",
+            "mqtt_topic_prefix",
+            "mqtt_format_string",
+            "mqtt_client_id",
+            "mqtt_publish_json",
+            "ha_discovery_enabled",
+        ):
+            clear_setting(cursor, key)
+        conn.commit()
+        raise SystemExit(0)
+
     set_setting(cursor, "can_interface", os.environ.get("OPEN3E_CAN_INTERFACE"))
     set_setting(cursor, "can_bitrate", os.environ.get("OPEN3E_CAN_BITRATE", "250000"))
     set_setting(cursor, "mqtt_host", os.environ.get("OPEN3E_MQTT_HOST"))
