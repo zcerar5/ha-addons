@@ -5,7 +5,7 @@ https://github.com/open3e/open3e/discussions/216
 
 Note: the ARMHF image was removed because it is no longer supported by Home Assistant Python base images.
 
-This add-on connects to a USB CAN adapter plugged into the Home Assistant device. By default it runs the legacy Open3e MQTT listener so the Open3e HACS integration controls which datapoints are requested and published to Home Assistant.
+This add-on connects to a USB CAN adapter plugged into the Home Assistant device. By default it starts the Open3e Web UI and also runs the legacy Open3e MQTT listener so the Open3e HACS integration controls which datapoints are requested and published to Home Assistant.
 
 This fork uses Open3e from upstream `develop`, keeps optional Web UI support, and exposes ViCare/ZigBee room device current values for the Vitocal/Vcal and Vitodens/Vdens profiles, so Home Assistant can categorize room temperature and humidity entities.
 
@@ -18,19 +18,19 @@ Usually only the topics need to be adjusted when you do not want to use the defa
 Options:
 
 - `can`: should usually be `can0`; if not found, check the network interfaces on your Home Assistant host and adjust accordingly.
-- `Web_UI_Enabled`: keep disabled for Open3e HACS integration compatibility; enable only when you want the Open3e Web UI to control polling.
-- `Web_UI_Port`: port used by the Open3e Web UI when enabled.
+- `Web_UI_Enabled`: starts the Open3e Web UI in addition to the Open3e HACS compatible listener.
+- `Web_UI_Port`: port used by the Open3e Web UI.
 - `Listen_Topic`: topic where the add-on listens for Open3e HACS integration commands.
 - `Server_Topic`: topic where Open3e publishes data.
 - `MQTT_FormatString`: leave the default option for Open3e HACS compatibility.
 - `MQTT_ClientID`: client ID used by the add-on in the MQTT broker.
 - `MQTT_Publish_JSON`: Web UI mode setting; keep disabled for Home Assistant so complex datapoints are split into subtopics.
-- `Auto_Select_HACS_Datapoints`: Web UI mode setting; enables the base datapoints used by the Open3e HACS integration.
-- `Auto_Select_Room_Datapoints`: Web UI mode setting; enables discovered room temperature and humidity datapoints at low priority.
+- `Auto_Select_HACS_Datapoints`: Web UI mode setting; disabled by default so Open3e HACS remains the polling controller.
+- `Auto_Select_Room_Datapoints`: Web UI mode setting; disabled by default so Open3e HACS remains the polling controller.
 
-When `Web_UI_Enabled` is disabled, Open3e HACS requests system information and feature values through `open3e/cmnd`, as with the original add-on.
+Open3e HACS requests system information and feature values through `open3e/cmnd`, as with the original add-on. That remains active even when the Web UI is enabled.
 
-When `Web_UI_Enabled` is enabled, open the add-on Web UI from Home Assistant, or browse to `http://<home-assistant-host>:5051`.
+Open the add-on Web UI from Home Assistant, or browse to `http://<home-assistant-host>:5051`. If you use the Web UI to enable polling or publish Home Assistant discovery, it becomes an additional controller alongside Open3e HACS and can create duplicate entities.
 
 Startup of the add-on:
 
