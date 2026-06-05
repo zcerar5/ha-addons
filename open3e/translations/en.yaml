@@ -8,7 +8,10 @@ configuration:
         description: Host CAN network interface connected to the E3 device.
       Web_UI_Enabled:
         name: Enable Web UI mode
-        description: Start Open3e Web UI in addition to the legacy MQTT listener used by the Open3e HACS integration.
+        description: Start the Open3e Web UI.
+      Controller_Mode:
+        name: Controller mode
+        description: Choose whether the Web UI controls CAN/MQTT polling or Open3e HACS controls polling through the legacy MQTT command listener.
       Web_UI_Port:
         name: Web UI port
         description: Port used by Open3e Web UI when Web UI mode is enabled.
