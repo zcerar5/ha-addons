@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.11
+
+- Add `Controller_Mode` with `webui` as the default and `open3e-ha` as the compatibility mode.
+- In `webui` mode, let the Open3e Web UI own CAN polling and MQTT publishing.
+- In `open3e-ha` mode, start the legacy MQTT command listener and keep the Web UI passive so both controllers do not compete.
+
 ## 0.6.10
 
 - Enable the Open3e Web UI by default while still running the legacy MQTT listener for Open3e HACS compatibility.
