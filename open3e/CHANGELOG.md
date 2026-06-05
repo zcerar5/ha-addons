@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.14
+
+- Fix the Web UI Write Values page when upstream `Open3Edatapoints_writables.json` is not present.
+- Use the Web UI Home Assistant writable entity definitions as the writable DID fallback.
+
 ## 0.6.13
 
 - Import existing `devices.json` and generated datapoint files into the Web UI database during add-on startup.
