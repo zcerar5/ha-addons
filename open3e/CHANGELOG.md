@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.12
+
+- Add a restricted Open3e Terminal page to the Web UI.
+- Allow running Open3e CLI tools from the add-on container without exposing a general-purpose shell.
+
 ## 0.6.11
 
 - Add `Controller_Mode` with `webui` as the default and `open3e-ha` as the compatibility mode.
