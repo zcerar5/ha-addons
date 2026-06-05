@@ -1,5 +1,5 @@
 ---
-version: 0.6.8
+version: 0.6.9
 slug: open3e
 name: Open3e
 description: Connect to E3 Controls through CAN with Open3e Web UI
@@ -19,10 +19,11 @@ watchdog: http://[HOST]:[PORT:5051]/api/live-status
 options:
   configurations:
     can: can0
+    Web_UI_Enabled: false
     Web_UI_Port: 5051
     Listen_Topic: open3e/cmnd
     Server_Topic: open3e
-    MQTT_FormatString: "{didNumber}_{didName}"
+    MQTT_FormatString: "{device}_{ecuAddr:03X}_{didNumber}_{didName}"
     MQTT_ClientID: open3e
     MQTT_Publish_JSON: false
     Auto_Select_HACS_Datapoints: true
@@ -32,6 +33,7 @@ privileged:
 schema:
   configurations:
     can: str
+    Web_UI_Enabled: bool
     Web_UI_Port: port
     Listen_Topic: str
     Server_Topic: str
