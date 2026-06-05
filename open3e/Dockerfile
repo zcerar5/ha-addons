@@ -12,6 +12,8 @@ COPY patch-open3e-vdens.py /tmp/patch-open3e-vdens.py
 RUN python /tmp/patch-open3e-vdens.py
 COPY patch-open3e-web-terminal.py /tmp/patch-open3e-web-terminal.py
 RUN python /tmp/patch-open3e-web-terminal.py
+COPY patch-open3e-web-writables.py /tmp/patch-open3e-web-writables.py
+RUN python /tmp/patch-open3e-web-writables.py
 
 COPY rootfs /
 RUN chmod a+x /run.sh
