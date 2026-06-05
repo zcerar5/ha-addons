@@ -33,6 +33,8 @@ In `open3e-ha` controller mode, Open3e HACS requests system information and feat
 
 Open the add-on Web UI from Home Assistant, or browse to `http://<home-assistant-host>:5051`.
 
+After system depiction in `webui` controller mode, use the Web UI Home Assistant suggested defaults action to enable the HACS-compatible base datapoints plus room temperature and humidity datapoints and create suggested Home Assistant MQTT discovery entities.
+
 The Web UI also includes a restricted Terminal page. It can run Open3e CLI tools such as `open3e --help`, `open3e_depictSystem --help`, and `open3e_topology --help` from `/data` inside the add-on container. It is not a general Linux shell.
 
 Startup of the add-on:

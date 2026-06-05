@@ -14,6 +14,8 @@ COPY patch-open3e-web-terminal.py /tmp/patch-open3e-web-terminal.py
 RUN python /tmp/patch-open3e-web-terminal.py
 COPY patch-open3e-web-writables.py /tmp/patch-open3e-web-writables.py
 RUN python /tmp/patch-open3e-web-writables.py
+COPY patch-open3e-web-ha-defaults.py /tmp/patch-open3e-web-ha-defaults.py
+RUN python /tmp/patch-open3e-web-ha-defaults.py
 
 COPY rootfs /
 RUN chmod a+x /run.sh

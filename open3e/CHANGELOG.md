@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.15
+
+- Make Web UI Home Assistant suggested defaults select the Open3e HACS-compatible datapoint set before creating discovery entities.
+- Add explicit suggested temperature and humidity entities for all advertised room device DID ranges.
+- Refresh the Web UI polling schedule after applying suggested Home Assistant defaults.
+
 ## 0.6.14
 
 - Fix the Web UI Write Values page when upstream `Open3Edatapoints_writables.json` is not present.

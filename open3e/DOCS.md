@@ -34,6 +34,8 @@ Open the Web UI from the add-on page or at `http://<home-assistant-host>:5051`.
 
 If `devices.json` and generated `Open3Edatapoints_*.py` files already exist in `/data`, the add-on imports them into the Web UI database during startup. That keeps discovered ECUs and datapoints visible after switching between controller modes.
 
+In `webui` controller mode, use the Web UI Home Assistant suggested defaults action after system depiction. It enables the same base datapoint set used by the Open3e HACS integration, adds the room temperature and humidity datapoints advertised by Open3e HACS, creates suggested Home Assistant discovery entities, and refreshes the polling schedule.
+
 The Web UI Write Values page is available for writable datapoints discovered on your system. Writing through that page requires `Controller_Mode` to be `webui`, because `open3e-ha` mode keeps the Web UI CAN engine passive.
 
 ## Web UI Terminal
