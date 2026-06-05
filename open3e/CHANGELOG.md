@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.10
+
+- Enable the Open3e Web UI by default while still running the legacy MQTT listener for Open3e HACS compatibility.
+- Keep Web UI datapoint auto-selection disabled by default so Open3e HACS remains the default polling controller.
+
 ## 0.6.9
 
 - Default back to the legacy Open3e MQTT listener so the Open3e HACS integration controls which datapoints are requested.
