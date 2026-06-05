@@ -28,6 +28,16 @@ ip link | grep $CAN
 
 bashio::log.info "Preparing to start...checking for devices.json"
 
+TERMINAL_TTYD_PORT=7682
+
+if command -v ttyd >/dev/null 2>&1 && command -v nginx >/dev/null 2>&1; then
+   bashio::log.info "Starting Open3e Legacy terminal for Home Assistant ingress"
+   ttyd -i 127.0.0.1 -p "$TERMINAL_TTYD_PORT" -W /bin/bash -l >/var/log/open3e-terminal.log 2>&1 &
+   nginx
+else
+   bashio::log.warning "Terminal support is unavailable because ttyd or nginx is missing"
+fi
+
 ROOM_DID_DISCOVERY_MARKER="/data/.open3e-room-dids-0.6.5"
 
 if ! test -f /data/devices.json || ! test -f "$ROOM_DID_DISCOVERY_MARKER"; then

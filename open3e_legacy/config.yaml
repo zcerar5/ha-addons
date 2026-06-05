@@ -1,5 +1,5 @@
 ---
-version: 0.6.5
+version: 0.6.6
 slug: open3e_legacy
 name: Open3e Legacy
 description: Classic Open3e MQTT listener for Open3e HACS
@@ -10,6 +10,12 @@ arch:
 hassio_api: true
 host_network: true
 init: false
+ingress: true
+ingress_port: 7681
+ingress_stream: true
+panel_icon: mdi:console
+panel_title: Open3e Legacy Terminal
+panel_admin: true
 options:
   configurations:
     can: can0

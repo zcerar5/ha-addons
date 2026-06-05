@@ -22,6 +22,12 @@ The first start may take longer because `open3e_depictSystem` creates `/data/dev
 
 Use this add-on when Open3e HACS should control polling through `open3e/cmnd`. Stop the WebUI add-on before starting this legacy add-on so both add-ons do not compete for the same CAN interface.
 
+## Terminal
+
+The add-on exposes a terminal through Home Assistant ingress. Start the add-on and use **Open Web UI** to open a shell inside the Open3e Legacy add-on container.
+
+The terminal is intended for Open3e troubleshooting commands such as `open3e --help`, `open3e_depictSystem --help`, and inspecting files in `/data`. It is not a host shell.
+
 This fork installs Open3e from upstream `develop` for the classic MQTT add-on and exposes ViCare/ZigBee room device current values in the Vitocal/Vcal and Vitodens/Vdens profiles. That lets the Open3e HACS integration create room temperature and humidity entities when those datapoints are present on the bus.
 
 ## Support

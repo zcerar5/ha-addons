@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.6
+
+- Add a Home Assistant ingress terminal for the legacy add-on.
+- Keep the classic Open3e HACS MQTT listener behavior unchanged.
+
 ## 0.6.5
 
 - Advertise ViCare/ZigBee room device current values for Vitocal/Vcal as well as Vitodens/Vdens profiles.

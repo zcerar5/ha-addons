@@ -27,6 +27,8 @@ Startup of the add-on, where initially the command `open3e_depictSystem` runs:
 
 ![Startup](https://raw.githubusercontent.com/zcerar5/ha-addons/refs/heads/main/open3e_legacy/images/homeassistant-startup.jpg)
 
+The add-on also exposes a terminal through the **Open Web UI** button in Home Assistant. This opens a shell inside the Open3e Legacy add-on container for Open3e troubleshooting commands.
+
 
 Using the Add-On for Demo purposes with the MQTT-Explorer and sending a command to the Listen_Topic Endpoint and seeing the reply on the open3e Topic:
 

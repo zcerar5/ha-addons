@@ -2,8 +2,8 @@ ARG BUILD_FROM=ghcr.io/home-assistant/base-python:3.14-alpine3.23
 FROM $BUILD_FROM
 
 
-RUN apk update && apk add --no-cache git iproute2
-RUN mkdir -p /data
+RUN apk update && apk add --no-cache bash git iproute2 nginx ttyd
+RUN mkdir -p /data /run/nginx
 WORKDIR /data
 
 RUN pip install "open3e @ git+https://github.com/open3e/open3e.git@develop"
