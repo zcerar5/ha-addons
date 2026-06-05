@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.13
+
+- Import existing `devices.json` and generated datapoint files into the Web UI database during add-on startup.
+- Keep depiction results visible in Web UI when switching between `webui` and `open3e-ha` controller modes.
+
 ## 0.6.12
 
 - Add a restricted Open3e Terminal page to the Web UI.
