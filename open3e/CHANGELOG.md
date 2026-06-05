@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.8
+
+- Build the add-on locally from the Dockerfile instead of pulling a prebuilt GHCR image.
+
 ## 0.6.7
 
 - Start the Open3e Web UI on port `5051` from the main `open3e` add-on.
