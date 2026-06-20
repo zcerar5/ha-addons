@@ -31,6 +31,17 @@ switching mode too frequently, which wastes energy and wears the compressor).
   Change it by editing `above:` in `heatpump_short_cycle_protect.yaml`
   (`above: N-1`) and the timer `duration` in `helpers.yaml`.
 
+## Getting this into Home Assistant
+
+These files are **not** auto-applied — Home Assistant doesn't read automations
+from this add-on repo. Copy them into your HA config one of two ways:
+
+- **UI:** create the helpers under Settings → Helpers, then paste each
+  `heatpump_short_cycle_*.yaml` into Settings → Automations → *Edit in YAML*.
+- **File editor / Samba / Studio Code Server:** append
+  `automations.yaml.append` to your `automations.yaml`, add `helpers.yaml` to
+  `configuration.yaml`, then restart / reload automations.
+
 ## Install
 
 1. **Helpers:** add `helpers.yaml` contents to your `configuration.yaml`
