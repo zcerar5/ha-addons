@@ -1,0 +1,45 @@
+alias: Heatpump short cycling alert
+description: >-
+  Notifies when the heat pump refrigeration circuit changes mode again too soon
+  after the previous change, which is a sign of short cycling (the compressor
+  switching on/off too frequently). Instead of alerting on every state change,
+  it only alerts when the previous mode lasted less than `min_cycle_minutes`.
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.vitocal_7470570540430221_refrigeration_circuit_mode
+    # Ignore transitions to/from these "not a real cycle" states
+    # (e.g. on Home Assistant restart or when the integration reconnects).
+    not_from:
+      - unknown
+      - unavailable
+    not_to:
+      - unknown
+      - unavailable
+variables:
+  # Minimum healthy time (in minutes) the circuit should stay in one mode.
+  # If it changes mode faster than this, treat it as short cycling.
+  # Recommended upper limit: 10 minutes (tune between 6 and 15 to taste).
+  min_cycle_minutes: 10
+  previous_mode: "{{ trigger.from_state.state }}"
+  new_mode: "{{ trigger.to_state.state }}"
+  cycle_seconds: >-
+    {{ (trigger.to_state.last_changed - trigger.from_state.last_changed).total_seconds() | int }}
+conditions:
+  # Make sure we actually have a previous state to measure against.
+  - condition: template
+    value_template: "{{ trigger.from_state is not none }}"
+  # Only fire when the previous mode was held for less than the threshold.
+  - condition: template
+    value_template: "{{ cycle_seconds < (min_cycle_minutes | int) * 60 }}"
+actions:
+  - action: notify.send_message
+    metadata: {}
+    target:
+      device_id: a4f37bb9f3d17bee5c057c299c8adc74
+    data:
+      message: >-
+        ⚠️ Heat pump possible short cycling: refrigeration circuit changed from
+        '{{ previous_mode }}' to '{{ new_mode }}' after only
+        {{ (cycle_seconds / 60) | round(1) }} min (threshold {{ min_cycle_minutes }} min).
+mode: single
