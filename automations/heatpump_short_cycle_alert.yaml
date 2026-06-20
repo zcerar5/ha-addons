@@ -33,13 +33,26 @@ conditions:
   - condition: template
     value_template: "{{ cycle_seconds < (min_cycle_minutes | int) * 60 }}"
 actions:
+  # Count this short cycle and (re)start the rolling 60-minute window. When the
+  # counter reaches the upper limit, the "protection" automation disables
+  # heating/cooling (see heatpump_short_cycle_protect.yaml). The window timer
+  # resets the counter once short cycling stops (see heatpump_short_cycle_reset.yaml).
+  - action: counter.increment
+    target:
+      entity_id: counter.heatpump_short_cycles
+  - action: timer.start
+    target:
+      entity_id: timer.heatpump_short_cycle_window
+    data:
+      duration: "01:00:00"
   - action: notify.send_message
     metadata: {}
     target:
       device_id: a4f37bb9f3d17bee5c057c299c8adc74
     data:
       message: >-
-        ⚠️ Heat pump possible short cycling: refrigeration circuit changed from
-        '{{ previous_mode }}' to '{{ new_mode }}' after only
-        {{ (cycle_seconds / 60) | round(1) }} min (threshold {{ min_cycle_minutes }} min).
+        ⚠️ Heat pump possible short cycling ({{ states('counter.heatpump_short_cycles') }} in
+        the last hour): refrigeration circuit changed from '{{ previous_mode }}' to
+        '{{ new_mode }}' after only {{ (cycle_seconds / 60) | round(1) }} min
+        (threshold {{ min_cycle_minutes }} min).
 mode: single

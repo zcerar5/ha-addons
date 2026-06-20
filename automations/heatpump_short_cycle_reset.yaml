@@ -1,0 +1,16 @@
+alias: Heatpump short cycle counter reset
+description: >-
+  Resets the short-cycle counter once the rolling window elapses with no further
+  short cycles. This is what makes the limit a "5 within 60 minutes" rolling
+  window rather than an all-time total.
+triggers:
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.heatpump_short_cycle_window
+conditions: []
+actions:
+  - action: counter.reset
+    target:
+      entity_id: counter.heatpump_short_cycles
+mode: single

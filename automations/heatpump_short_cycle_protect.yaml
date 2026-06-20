@@ -1,0 +1,40 @@
+alias: Heatpump short cycling protection (disable heating/cooling, keep DHW)
+description: >-
+  Upper-limit protection: when the heat pump records too many short cycles within
+  the rolling window (counter.heatpump_short_cycles), turn OFF space
+  heating/cooling to protect the compressor while leaving domestic hot water
+  (DHW) running. DHW is a separate water_heater entity, so turning off the
+  heating climate entities does not affect hot water production.
+triggers:
+  # Fires when the counter crosses the upper limit. "above: 4" => reaches 5.
+  # To change the limit to N, set above: (N - 1).
+  - trigger: numeric_state
+    entity_id: counter.heatpump_short_cycles
+    above: 4
+conditions: []
+actions:
+  # Turn off space heating/cooling. Both candidate heating climate entities are
+  # listed because the controlling entity was not certain.
+  # VERIFY/trim these entity_ids in Developer Tools -> States:
+  #   - climate.vitocal_climate_circuit_1   ("Vitocal Climate circuit 1")
+  #   - climate.e3_vitocal_16_heating       ("E3 Vitocal 16 Heating")
+  - action: climate.turn_off
+    target:
+      entity_id:
+        - climate.vitocal_climate_circuit_1
+        - climate.e3_vitocal_16_heating
+  # Reset the counter so the protection only fires once per episode.
+  - action: counter.reset
+    target:
+      entity_id: counter.heatpump_short_cycles
+  - action: notify.send_message
+    metadata: {}
+    target:
+      device_id: a4f37bb9f3d17bee5c057c299c8adc74
+    data:
+      message: >-
+        🛑 Heat pump short cycling protection triggered: 5 short cycles within the
+        last hour. Space heating/cooling has been turned OFF to protect the
+        compressor. Domestic hot water (DHW) is left running. Re-enable heating
+        manually once the cause is resolved.
+mode: single
