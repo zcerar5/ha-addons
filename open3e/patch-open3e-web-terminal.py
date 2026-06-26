@@ -40,6 +40,17 @@ TERMINAL_TEMPLATE = r"""{% extends "base.html" %}
                 <button class="btn btn-outline-secondary btn-sm" onclick="setTerminalCommand('open3e_topology --help')">topology help</button>
                 <button class="btn btn-outline-secondary btn-sm" onclick="setTerminalCommand('open3e_dids2json --help')">dids2json help</button>
             </div>
+            <hr class="my-3">
+            <div class="text-muted small mb-2">
+                <i class="bi bi-thermometer-half"></i> Find which DID a control (e.g. Vitotrol 300-E) writes:
+                pause polling, snapshot <code>before</code>, change the temperature, snapshot <code>after</code>, then diff.
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-primary btn-sm" onclick="setTerminalCommand('open3e_capture snapshot before')">snapshot before</button>
+                <button class="btn btn-outline-primary btn-sm" onclick="setTerminalCommand('open3e_capture snapshot after')">snapshot after</button>
+                <button class="btn btn-outline-primary btn-sm" onclick="setTerminalCommand('open3e_capture diff before after')">diff before after</button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="setTerminalCommand('open3e_capture --help')">capture help</button>
+            </div>
         </div>
     </div>
 
@@ -138,6 +149,7 @@ TERMINAL_ROUTES = r'''
             "open3e_dids2json",
             "open3e_dids2md",
             "open3e_topology",
+            "open3e_capture",
         }
         if not args or args[0] not in allowed_commands:
             raise HTTPException(
