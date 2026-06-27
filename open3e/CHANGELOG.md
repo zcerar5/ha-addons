@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.16
+
+- Add an `open3e_capture` Terminal helper to find which DID a hardware control (e.g. a Vitotrol 300-E room remote) writes when you change a setting.
+- Snapshot DID values before and after a physical change, then diff to reveal the write target so it can be exposed as a writable Home Assistant entity.
+
 ## 0.6.15
 
 - Make Web UI Home Assistant suggested defaults select the Open3e HACS-compatible datapoint set before creating discovery entities.

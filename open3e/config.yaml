@@ -1,5 +1,5 @@
 ---
-version: 0.6.15
+version: 0.6.16
 slug: open3e
 name: Open3e
 description: Connect to E3 Controls through CAN with Open3e Web UI
