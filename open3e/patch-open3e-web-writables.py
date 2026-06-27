@@ -30,7 +30,14 @@ anchor = """        # Get codec metadata for each writable DID
             import open3e.Open3Edatapoints as dp_mod
 """
 
-if "from open3e.web.ha_discovery import WRITABLE_ENTITIES" not in server_source:
+# Skip when upstream already references WRITABLE_ENTITIES in server.py. Recent
+# develop (>=0.7.x) imports it natively in a combined import line and creates
+# writable entities from it unconditionally, so this fallback is redundant.
+# The previous guard matched only the exact standalone import string, which no
+# longer appears in the combined import, so it would inject dead code. Checking
+# for any WRITABLE_ENTITIES usage makes the patch a clean no-op on current
+# upstream while still applying on older bases that lack it.
+if "WRITABLE_ENTITIES" not in server_source:
     if anchor not in server_source:
         raise RuntimeError("Could not find writable metadata anchor in server.py")
     server_source = server_source.replace(anchor, WRITABLE_FALLBACK + anchor, 1)
