@@ -1,0 +1,101 @@
+# Append the entries below to your Home Assistant automations.yaml
+# (this file format is a LIST with unique ids, for file-based config).
+# If you instead use the UI "Edit in YAML" editor, use the individual
+# heatpump_short_cycle_*.yaml files instead (those omit the id).
+
+- id: heatpump_short_cycle_alert
+  alias: Heatpump short cycling alert
+  description: >-
+    Notifies when the heat pump refrigeration circuit changes mode again too soon
+    after the previous change (short cycling), and counts it toward the protection
+    limit.
+  triggers:
+    - trigger: state
+      entity_id:
+        - sensor.vitocal_7470570540430221_refrigeration_circuit_mode
+      not_from:
+        - unknown
+        - unavailable
+      not_to:
+        - unknown
+        - unavailable
+  variables:
+    min_cycle_minutes: 10
+    previous_mode: "{{ trigger.from_state.state }}"
+    new_mode: "{{ trigger.to_state.state }}"
+    cycle_seconds: >-
+      {{ (trigger.to_state.last_changed - trigger.from_state.last_changed).total_seconds() | int }}
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.from_state is not none }}"
+    - condition: template
+      value_template: "{{ cycle_seconds < (min_cycle_minutes | int) * 60 }}"
+  actions:
+    - action: counter.increment
+      target:
+        entity_id: counter.heatpump_short_cycles
+    - action: timer.start
+      target:
+        entity_id: timer.heatpump_short_cycle_window
+      data:
+        duration: "01:00:00"
+    - action: notify.send_message
+      metadata: {}
+      target:
+        device_id: a4f37bb9f3d17bee5c057c299c8adc74
+      data:
+        message: >-
+          ⚠️ Heat pump possible short cycling ({{ states('counter.heatpump_short_cycles') }} in
+          the last hour): refrigeration circuit changed from '{{ previous_mode }}' to
+          '{{ new_mode }}' after only {{ (cycle_seconds / 60) | round(1) }} min
+          (threshold {{ min_cycle_minutes }} min).
+  mode: single
+
+- id: heatpump_short_cycle_protect
+  alias: Heatpump short cycling protection (disable heating/cooling, keep DHW)
+  description: >-
+    After too many short cycles within the rolling window, turn OFF space
+    heating/cooling to protect the compressor while leaving DHW running.
+  triggers:
+    - trigger: numeric_state
+      entity_id: counter.heatpump_short_cycles
+      above: 4
+  conditions: []
+  actions:
+    # VERIFY/trim these entity_ids in Developer Tools -> States.
+    - action: climate.turn_off
+      target:
+        entity_id:
+          - climate.vitocal_climate_circuit_1
+          - climate.e3_vitocal_16_heating
+    - action: counter.reset
+      target:
+        entity_id: counter.heatpump_short_cycles
+    - action: notify.send_message
+      metadata: {}
+      target:
+        device_id: a4f37bb9f3d17bee5c057c299c8adc74
+      data:
+        message: >-
+          🛑 Heat pump short cycling protection triggered: 5 short cycles within the
+          last hour. Space heating/cooling has been turned OFF to protect the
+          compressor. Domestic hot water (DHW) is left running. Re-enable heating
+          manually once the cause is resolved.
+  mode: single
+
+- id: heatpump_short_cycle_reset
+  alias: Heatpump short cycle counter reset
+  description: >-
+    Resets the short-cycle counter once the rolling window elapses with no further
+    short cycles (makes the limit a rolling "5 within 60 minutes").
+  triggers:
+    - trigger: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.heatpump_short_cycle_window
+  conditions: []
+  actions:
+    - action: counter.reset
+      target:
+        entity_id: counter.heatpump_short_cycles
+  mode: single

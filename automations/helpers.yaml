@@ -1,0 +1,19 @@
+# Helpers required by the heat pump short-cycling automations.
+# Add these to your Home Assistant configuration.yaml (or a package) and restart,
+# OR create equivalents via Settings -> Devices & services -> Helpers.
+
+counter:
+  heatpump_short_cycles:
+    name: Heat pump short cycles
+    icon: mdi:sync-alert
+    initial: 0
+    step: 1
+    minimum: 0
+
+timer:
+  heatpump_short_cycle_window:
+    name: Heat pump short-cycle window
+    # Rolling window: each new short cycle restarts this timer. When it elapses
+    # with no further short cycles, the counter is reset to 0.
+    duration: "01:00:00"
+    restore: true

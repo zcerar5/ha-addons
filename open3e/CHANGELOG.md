@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.18
+
+- Verify the build-time source patches against current upstream open3e `develop` (0.7.4). The terminal, HA-defaults, and Vcal/Vdens datapoint patches still apply and remain needed.
+- Fix the writables patch so it cleanly no-ops on recent upstream: develop now imports and uses `WRITABLE_ENTITIES` natively (in a combined import line), which the old exact-string guard missed, causing it to inject a redundant fallback. The guard now detects any native `WRITABLE_ENTITIES` usage.
+
 ## 0.6.17
 
 - Let `open3e_capture` enumerate DIDs from `devices.json` when the Web UI database is absent, so the same helper works in the legacy MQTT add-on.
