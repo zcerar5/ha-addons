@@ -28,6 +28,19 @@ The add-on exposes a terminal through Home Assistant ingress. Start the add-on a
 
 The terminal is intended for Open3e troubleshooting commands such as `open3e --help`, `open3e_depictSystem --help`, and inspecting files in `/data`. It is not a host shell.
 
+## Finding which DID a hardware control writes
+
+A physical room control such as a **Vitotrol 300-E** talks to the heat pump over the same E3 CAN bus that Open3e uses. When you change a temperature on it, it writes a value to a datapoint (DID) on the bus. The `open3e_capture` helper finds that DID so it can later be exposed in Home Assistant as a writable entity.
+
+In this add-on the legacy `open3e --listen` listener holds the CAN bus, so first **pause the Open3e HACS integration polling** to keep the bus quiet, then in the ingress terminal run:
+
+1. `open3e_capture snapshot before`
+2. Change the temperature on the Vitotrol, then wait ~30 seconds.
+3. `open3e_capture snapshot after`
+4. `open3e_capture diff before after`
+
+The diff lists every datapoint that changed, temperature-like entries first; the one matching the value you dialled in is the write target. By default a snapshot reads only temperature/setpoint-like datapoints; add `--all` to both snapshots if the diff shows nothing. Snapshots are saved under `/data/open3e_captures/`.
+
 This fork installs Open3e from upstream `develop` for the classic MQTT add-on and exposes ViCare/ZigBee room device current values in the Vitocal/Vcal and Vitodens/Vdens profiles. That lets the Open3e HACS integration create room temperature and humidity entities when those datapoints are present on the bus.
 
 ## Support

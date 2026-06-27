@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.7
+
+- Add the `open3e_capture` helper to find which DID a hardware control (e.g. a Vitotrol 300-E room remote) writes when you change a setting.
+- The helper enumerates DIDs from `devices.json` so it works without the Web UI database; run it from the ingress terminal.
+
 ## 0.6.6
 
 - Add a Home Assistant ingress terminal for the legacy add-on.

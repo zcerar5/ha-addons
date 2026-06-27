@@ -40,9 +40,21 @@ The Web UI Write Values page is available for writable datapoints discovered on 
 
 ## Web UI Terminal
 
-The Web UI includes a restricted Terminal page for Open3e CLI tools. It runs commands from `/data` inside the add-on container and allows only `open3e`, `open3e_depictSystem`, `open3e_dids2json`, `open3e_dids2md`, and `open3e_topology`.
+The Web UI includes a restricted Terminal page for Open3e CLI tools. It runs commands from `/data` inside the add-on container and allows only `open3e`, `open3e_depictSystem`, `open3e_dids2json`, `open3e_dids2md`, `open3e_topology`, and `open3e_capture`.
 
 It does not expose a general-purpose Linux shell. Shell features such as pipes, redirects, command chaining, and arbitrary commands are intentionally unavailable.
+
+## Finding which DID a hardware control writes
+
+A physical room control such as a **Vitotrol 300-E** talks to the heat pump over the same E3 CAN bus that Open3e uses. When you change a temperature on it, it writes a value to a datapoint (DID) on the bus. The `open3e_capture` Terminal helper finds that DID so it can be exposed in Home Assistant as a writable entity.
+
+1. Pause polling in the Web UI so two readers do not compete for the CAN bus.
+2. In the Terminal, run `open3e_capture snapshot before`.
+3. Change the temperature on the Vitotrol, then wait ~30 seconds.
+4. Run `open3e_capture snapshot after`.
+5. Run `open3e_capture diff before after`.
+
+The diff lists every datapoint that changed, with temperature-like entries flagged first. The one whose value matches what you dialled in is the write target. By default a snapshot reads only temperature/setpoint-like datapoints; add `--all` to both snapshots if the diff shows nothing. Snapshots are saved under `/data/open3e_captures/`.
 
 This fork exposes ViCare/ZigBee room device current values in the Vitocal/Vcal and Vitodens/Vdens profiles. That lets Home Assistant create room temperature and humidity entities when those datapoints are present on the bus.
 

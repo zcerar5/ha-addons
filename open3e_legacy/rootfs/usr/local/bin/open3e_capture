@@ -1,0 +1,333 @@
+#!/usr/bin/env python3
+"""open3e_capture - find which DID a physical control writes.
+
+Use this to discover which Open3e datapoint (DID) changes when you adjust a
+setting on a hardware control such as a Vitotrol 300-E room remote. Once you
+know the DID, it can be exposed in Home Assistant as a writable entity.
+
+Workflow (run from the add-on Web UI Terminal):
+
+    1. Pause polling in the Web UI (avoids CAN bus contention).
+    2. open3e_capture snapshot before
+    3. Change the temperature on the Vitotrol, then wait ~30 seconds.
+    4. open3e_capture snapshot after
+    5. open3e_capture diff before after
+
+The DID whose value moved to match what you dialled in is the write target.
+
+By default a snapshot reads only temperature/setpoint-like datapoints (fast,
+stays within the Terminal's time limit). Pass --all to read every known DID.
+"""
+
+import argparse
+import datetime
+import importlib.util
+import json
+import os
+import sqlite3
+import subprocess
+from pathlib import Path
+
+DB_PATH = os.environ.get("OPEN3E_DB_PATH", "/data/open3e_web.db")
+DEVICES_JSON = Path("/data/devices.json")
+CAPTURE_DIR = Path(os.environ.get("OPEN3E_CAPTURE_DIR", "/data/open3e_captures"))
+DEFAULT_CAN = os.environ.get("OPEN3E_CAN_INTERFACE", "can0")
+
+# Datapoint name fragments that hint at a temperature target / setpoint.
+TEMP_HINTS = (
+    "temp", "setpoint", "soll", "room", "comfort", "normal", "reduced",
+    "heating", "target",
+)
+
+# Room device / mixer DID ranges advertised by this add-on, plus their
+# immediate neighbours where a setpoint commonly sits next to a current value.
+ROOM_AND_HC_DIDS = (
+    set(range(334, 338))
+    | set(range(1886, 1944))
+    | set(range(2086, 2144))
+    | set(range(2262, 2320))
+)
+
+
+def log(msg):
+    print(msg, flush=True)
+
+
+def load_datapoints(ecu_filter, want_all):
+    """Return [(ecu_address:int, did:int, name:str)].
+
+    Reads from the Web UI database when present, and otherwise from
+    devices.json plus the generated datapoint modules -- so it works in both
+    the Web UI add-on and the legacy MQTT add-on.
+    """
+    rows = _load_from_db() or _load_from_devices()
+    result = []
+    for ecu_address, did, name in rows:
+        if ecu_filter is not None and ecu_address != ecu_filter:
+            continue
+        if not want_all and not _is_candidate(did, name):
+            continue
+        result.append((ecu_address, did, name))
+    return result
+
+
+def _load_from_db():
+    if not Path(DB_PATH).is_file():
+        return []
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        try:
+            rows = conn.execute(
+                "SELECT ecu_address, did, name FROM datapoints "
+                "ORDER BY ecu_address, did"
+            ).fetchall()
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return []
+    return [(int(e), int(d), n or "DID_%d" % int(d)) for e, d, n in rows]
+
+
+def _load_from_devices():
+    """Enumerate DIDs from /data/devices.json and its datapoint modules."""
+    if not DEVICES_JSON.is_file():
+        return []
+    try:
+        devices = json.loads(DEVICES_JSON.read_text())
+    except (json.JSONDecodeError, ValueError, OSError):
+        return []
+
+    result = []
+    for _key, cfg in devices.items():
+        raw = cfg.get("tx")
+        if raw is None:
+            continue
+        try:
+            ecu = int(raw, 16) if isinstance(raw, str) else int(raw)
+        except (TypeError, ValueError):
+            continue
+        dp_list = cfg.get("dpList", "")
+        dp_path = Path("/data") / dp_list
+        if not dp_list or not dp_path.is_file():
+            continue
+        for did, codec in _load_dp_module(dp_path).items():
+            try:
+                did = int(did)
+            except (TypeError, ValueError):
+                continue
+            name = getattr(codec, "id", None) or "DID_%d" % did
+            result.append((ecu, did, name))
+    return sorted(result)
+
+
+def _load_dp_module(dp_path):
+    try:
+        mod_name = "o3e_dp_" + dp_path.stem.replace("-", "_").replace(".", "_")
+        spec = importlib.util.spec_from_file_location(mod_name, dp_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.dataIdentifiers.get("dids", {})
+    except Exception:
+        return {}
+
+
+def _is_candidate(did, name):
+    lowered = name.lower()
+    if any(hint in lowered for hint in TEMP_HINTS):
+        return True
+    return did in ROOM_AND_HC_DIDS
+
+
+def chunked(seq, size):
+    for i in range(0, len(seq), size):
+        yield seq[i:i + size]
+
+
+def run_open3e_read(addresses, can):
+    """Read 'ecu.did' addresses; return (parsed_json_or_None, error_text)."""
+    cmd = ["open3e", "--can", can]
+    if DEVICES_JSON.is_file():
+        cmd += ["--config", str(DEVICES_JSON)]
+    cmd += ["-j", "-r", ",".join(addresses)]
+    try:
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=90, cwd="/data",
+        )
+    except subprocess.TimeoutExpired:
+        return None, "timeout"
+    out = (proc.stdout or "").strip()
+    try:
+        parsed = json.loads(out)
+    except (json.JSONDecodeError, ValueError):
+        return None, out or (proc.stderr or "").strip()
+    if not isinstance(parsed, dict):
+        return None, "unexpected output: %r" % (parsed,)
+    return parsed, None
+
+
+def cmd_snapshot(args):
+    can = args.can
+
+    if args.dids:
+        ecu = int(args.ecu, 16) if args.ecu else 0x680
+        datapoints = [
+            (ecu, int(d), "DID_%s" % d)
+            for d in args.dids.split(",") if d.strip()
+        ]
+    else:
+        ecu_filter = int(args.ecu, 16) if args.ecu else None
+        datapoints = load_datapoints(ecu_filter, args.all)
+
+    if not datapoints:
+        log("No datapoints to read. Run a system depiction first, or pass "
+            "--dids / --all.")
+        return 2
+
+    addresses = ["0x%03x.%d" % (ecu, did) for ecu, did, _ in datapoints]
+    log("Reading %d datapoint(s) on %s%s ..."
+        % (len(addresses), can, "" if args.all or args.dids else " (candidates)"))
+
+    values = {}
+    done = 0
+    for chunk in chunked(addresses, args.chunk):
+        parsed, err = run_open3e_read(chunk, can)
+        if parsed is None and len(chunk) > 1:
+            # One bad DID can abort a batch; retry the chunk one DID at a time.
+            for addr in chunk:
+                single, _ = run_open3e_read([addr], can)
+                if single is not None:
+                    values.update(single)
+        elif parsed is not None:
+            values.update(parsed)
+        done += len(chunk)
+        log("  %d/%d" % (done, len(addresses)))
+
+    if not values:
+        log("Read 0 values. Is polling paused and the CAN interface up?")
+        return 1
+
+    CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = CAPTURE_DIR / ("%s.json" % args.label)
+    payload = {
+        "label": args.label,
+        "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
+        "can": can,
+        "values": values,
+    }
+    out_path.write_text(json.dumps(payload, indent=2, default=str))
+    log("Saved snapshot '%s' (%d values) -> %s"
+        % (args.label, len(values), out_path))
+    return 0
+
+
+def _load_snapshot(label):
+    path = CAPTURE_DIR / ("%s.json" % label)
+    if not path.is_file():
+        raise SystemExit("No snapshot named '%s' (looked in %s)" % (label, path))
+    return json.loads(path.read_text())
+
+
+def _deep_diff(before, after, path=""):
+    if isinstance(before, dict) and isinstance(after, dict):
+        for key in sorted(set(before) | set(after), key=str):
+            child = "%s.%s" % (path, key) if path else str(key)
+            yield from _deep_diff(
+                before.get(key, "<absent>"), after.get(key, "<absent>"), child
+            )
+    elif isinstance(before, list) and isinstance(after, list):
+        if before != after:
+            for i in range(max(len(before), len(after))):
+                bv = before[i] if i < len(before) else "<absent>"
+                av = after[i] if i < len(after) else "<absent>"
+                yield from _deep_diff(bv, av, "%s[%d]" % (path, i))
+    elif before != after:
+        yield path, before, after
+
+
+def cmd_diff(args):
+    before = _load_snapshot(args.before)
+    after = _load_snapshot(args.after)
+    changes = list(_deep_diff(before.get("values", {}), after.get("values", {})))
+
+    if not changes:
+        log("No differences between '%s' and '%s'."
+            % (args.before, args.after))
+        log("If you changed the Vitotrol but nothing shows, re-run both "
+            "snapshots with --all to widen the scan.")
+        return 0
+
+    # Surface temperature-like changes first.
+    def is_temp(path):
+        return any(hint in path.lower() for hint in TEMP_HINTS)
+
+    changes.sort(key=lambda c: (not is_temp(c[0]), c[0]))
+
+    log("%d datapoint(s) changed between '%s' and '%s':\n"
+        % (len(changes), args.before, args.after))
+    for path, b, a in changes:
+        marker = "   <-- likely setpoint" if is_temp(path) else ""
+        log("%s%s" % (path, marker))
+        log("    before: %s" % (b,))
+        log("    after:  %s\n" % (a,))
+    log("The entry matching the value you dialled in on the Vitotrol is the "
+        "DID to make writable.")
+    return 0
+
+
+def cmd_list(args):
+    if not CAPTURE_DIR.is_dir():
+        log("No snapshots yet.")
+        return 0
+    snaps = sorted(CAPTURE_DIR.glob("*.json"))
+    if not snaps:
+        log("No snapshots yet.")
+        return 0
+    for path in snaps:
+        try:
+            data = json.loads(path.read_text())
+            log("%-20s %s  (%d values)"
+                % (path.stem, data.get("timestamp", "?"),
+                   len(data.get("values", {}))))
+        except (json.JSONDecodeError, ValueError):
+            log("%-20s (unreadable)" % path.stem)
+    return 0
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog="open3e_capture",
+        description="Snapshot and diff Open3e DID values to find which DID a "
+                    "hardware control (e.g. Vitotrol 300-E) writes.",
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    snap = sub.add_parser("snapshot", help="read DID values into a named snapshot")
+    snap.add_argument("label", help="snapshot name, e.g. before / after")
+    snap.add_argument("--can", default=DEFAULT_CAN, help="CAN interface")
+    snap.add_argument("--ecu", help="limit to one ECU, hex e.g. 0x680")
+    snap.add_argument("--dids", help="explicit comma DID list (skips DB lookup)")
+    snap.add_argument("--all", action="store_true",
+                      help="read every known DID, not just temperature ones")
+    snap.add_argument("--chunk", type=int, default=40,
+                      help="DIDs per open3e read call (default 40)")
+    snap.set_defaults(func=cmd_snapshot)
+
+    diff = sub.add_parser("diff", help="show DIDs that changed between two snapshots")
+    diff.add_argument("before")
+    diff.add_argument("after")
+    diff.set_defaults(func=cmd_diff)
+
+    lst = sub.add_parser("list", help="list saved snapshots")
+    lst.set_defaults(func=cmd_list)
+
+    return parser
+
+
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
