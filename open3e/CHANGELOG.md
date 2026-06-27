@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.17
+
+- Let `open3e_capture` enumerate DIDs from `devices.json` when the Web UI database is absent, so the same helper works in the legacy MQTT add-on.
+
 ## 0.6.16
 
 - Add an `open3e_capture` Terminal helper to find which DID a hardware control (e.g. a Vitotrol 300-E room remote) writes when you change a setting.
