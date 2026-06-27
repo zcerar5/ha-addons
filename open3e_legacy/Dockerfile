@@ -12,7 +12,7 @@ COPY patch-open3e-vdens.py /tmp/patch-open3e-vdens.py
 RUN python /tmp/patch-open3e-vdens.py
 
 COPY rootfs /
-RUN chmod a+x /run.sh
+RUN chmod a+x /run.sh /usr/local/bin/open3e_capture
 
 CMD [ "/run.sh" ]
 
