@@ -1,5 +1,5 @@
 ---
-version: 0.6.8
+version: 0.6.9
 slug: open3e_legacy
 name: Open3e Legacy
 description: Classic Open3e MQTT listener for Open3e HACS

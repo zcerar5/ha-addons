@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.19
+
+- Flatten the new O3ESwitch ZigBee payloads before MQTT publishing so `ActualTemperature` and `Humidity` stay at the payload top level, matching what Home Assistant consumers expect.
+
 ## 0.6.18
 
 - Pin Open3e to the last upstream commit that still ships the Web UI (upstream moved the Web UI out of `develop` to the `feature/WebUI` branch, so unpinned rebuilds would fail).

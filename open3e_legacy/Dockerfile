@@ -12,6 +12,8 @@ RUN pip install "open3e @ git+https://github.com/open3e/open3e.git@2375e95e3f274
 
 COPY patch-open3e-vdens.py /tmp/patch-open3e-vdens.py
 RUN python /tmp/patch-open3e-vdens.py
+COPY patch-open3e-zigbee-flatten.py /tmp/patch-open3e-zigbee-flatten.py
+RUN python /tmp/patch-open3e-zigbee-flatten.py
 
 COPY rootfs /
 RUN chmod a+x /run.sh /usr/local/bin/open3e_capture
