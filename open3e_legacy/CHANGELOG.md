@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.9
+
+- Flatten the new O3ESwitch ZigBee payloads before MQTT publishing: `ActualTemperature`, `Humidity` and other device fields are published at the top level again, with `ViCareDevice` as a plain `{ID, Text}` enum.
+- Restores compatibility with the Open3e HA integration and MQTT discovery consumers that parse the pre-0.6.8 payload shape, while keeping the corrected temperature decoding.
+
 ## 0.6.8
 
 - Update Open3e to current upstream `develop` (pinned commit) with the new `O3ESwitch` ZigBee room device codec.
