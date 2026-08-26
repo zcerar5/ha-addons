@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.20
+
+- Decode the Vitotrol room remote (ViCare device type 8) on the ZigBee bus: temperature and humidity are now published like other room devices.
+
 ## 0.6.19
 
 - Flatten the new O3ESwitch ZigBee payloads before MQTT publishing so `ActualTemperature` and `Humidity` stay at the payload top level, matching what Home Assistant consumers expect.

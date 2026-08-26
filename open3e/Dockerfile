@@ -15,6 +15,8 @@ COPY patch-open3e-vdens.py /tmp/patch-open3e-vdens.py
 RUN python /tmp/patch-open3e-vdens.py
 COPY patch-open3e-zigbee-flatten.py /tmp/patch-open3e-zigbee-flatten.py
 RUN python /tmp/patch-open3e-zigbee-flatten.py
+COPY patch-open3e-vitotrol.py /tmp/patch-open3e-vitotrol.py
+RUN python /tmp/patch-open3e-vitotrol.py
 COPY patch-open3e-web-terminal.py /tmp/patch-open3e-web-terminal.py
 RUN python /tmp/patch-open3e-web-terminal.py
 COPY patch-open3e-web-writables.py /tmp/patch-open3e-web-writables.py
