@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.8
+
+- Update Open3e to current upstream `develop` (pinned commit) with the new `O3ESwitch` ZigBee room device codec.
+- Fixes room sensors whose temperature decoded as ~0.3 °C: values are now decoded per device type (climate sensor, TRV, floor thermostat, actuator).
+- Re-run system depiction once after update so the new codecs are used for discovered ECUs. The first start after updating takes longer.
+
 ## 0.6.7
 
 - Add the `open3e_capture` helper to find which DID a hardware control (e.g. a Vitotrol 300-E room remote) writes when you change a setting.

@@ -6,7 +6,10 @@ RUN apk update && apk add --no-cache git iproute2
 RUN mkdir -p /data
 WORKDIR /data
 
-RUN pip install "open3e[web] @ git+https://github.com/open3e/open3e.git@develop"
+# Pinned to the last upstream commit that still contains the Web UI
+# (upstream later moved it to the feature/WebUI branch, which points at this
+# same commit). Includes the O3ESwitch ZigBee room device codec fixes.
+RUN pip install "open3e[web] @ git+https://github.com/open3e/open3e.git@3dba3948f49fc053142b6650b952dcee5802cf81"
 
 COPY patch-open3e-vdens.py /tmp/patch-open3e-vdens.py
 RUN python /tmp/patch-open3e-vdens.py
