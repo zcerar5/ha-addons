@@ -38,7 +38,10 @@ else
    bashio::log.warning "Terminal support is unavailable because ttyd or nginx is missing"
 fi
 
-ROOM_DID_DISCOVERY_MARKER="/data/.open3e-room-dids-0.6.8"
+# Tied to the add-on version: generated depiction files in /data embed codec
+# definitions, so every add-on update must re-run depiction to pick up
+# datapoint/codec patches.
+ROOM_DID_DISCOVERY_MARKER="/data/.open3e-room-dids-${BUILD_VERSION:-unknown}"
 
 if ! test -f /data/devices.json || ! test -f "$ROOM_DID_DISCOVERY_MARKER"; then
    bashio::log.info "Running open3e_depictSystem -c $CAN ... This may take a while"

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.11
+
+- Re-run system depiction on every add-on update: the generated depiction files in `/data` embed codec definitions, so codec patches (like the Vitotrol decode in 0.6.10) only take effect after regeneration. The first start after each update takes a few minutes.
+
 ## 0.6.10
 
 - Decode the Vitotrol room remote (ViCare device type 8) on the ZigBee bus: temperature and humidity are now published like other room devices. Layout confirmed against a live Vitotrol 300-E capture.
