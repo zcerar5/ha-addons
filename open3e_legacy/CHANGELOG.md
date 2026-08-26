@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.10
+
+- Decode the Vitotrol room remote (ViCare device type 8) on the ZigBee bus: temperature and humidity are now published like other room devices. Layout confirmed against a live Vitotrol 300-E capture.
+- Name device type 8 in the ViCareDeviceTypes enum.
+
 ## 0.6.9
 
 - Flatten the new O3ESwitch ZigBee payloads before MQTT publishing: `ActualTemperature`, `Humidity` and other device fields are published at the top level again, with `ViCareDevice` as a plain `{ID, Text}` enum.
