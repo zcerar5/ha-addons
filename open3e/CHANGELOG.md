@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.18
+
+- Pin Open3e to the last upstream commit that still ships the Web UI (upstream moved the Web UI out of `develop` to the `feature/WebUI` branch, so unpinned rebuilds would fail).
+- The pinned commit includes the new `O3ESwitch` ZigBee room device codec that fixes room sensor temperatures decoding as ~0.3 °C.
+
 ## 0.6.17
 
 - Let `open3e_capture` enumerate DIDs from `devices.json` when the Web UI database is absent, so the same helper works in the legacy MQTT add-on.
