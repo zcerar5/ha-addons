@@ -38,10 +38,13 @@ else
    bashio::log.warning "Terminal support is unavailable because ttyd or nginx is missing"
 fi
 
-# Tied to the add-on version: generated depiction files in /data embed codec
-# definitions, so every add-on update must re-run depiction to pick up
-# datapoint/codec patches.
-ROOM_DID_DISCOVERY_MARKER="/data/.open3e-room-dids-${BUILD_VERSION:-unknown}"
+# Fixed marker: depiction runs only when this file is missing. Generated
+# depiction files in /data embed codec definitions, so after an update that
+# changes datapoint codecs, force a one-time re-depiction from the terminal:
+#   rm /data/.open3e-room-dids-*
+# and restart the add-on. Bump the marker name in a release only when that
+# release requires re-depiction for everyone.
+ROOM_DID_DISCOVERY_MARKER="/data/.open3e-room-dids-0.6.8"
 
 if ! test -f /data/devices.json || ! test -f "$ROOM_DID_DISCOVERY_MARKER"; then
    bashio::log.info "Running open3e_depictSystem -c $CAN ... This may take a while"

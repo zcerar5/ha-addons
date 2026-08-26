@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.12
+
+- Revert the 0.6.11 behavior of re-running the (long) system depiction on every add-on update.
+- Depiction now runs only when needed: force it manually by removing the marker file (`rm /data/.open3e-room-dids-*` in the terminal) and restarting the add-on. Releases that require re-depiction for everyone will bump the marker name explicitly.
+
 ## 0.6.11
 
 - Re-run system depiction on every add-on update: the generated depiction files in `/data` embed codec definitions, so codec patches (like the Vitotrol decode in 0.6.10) only take effect after regeneration. The first start after each update takes a few minutes.
