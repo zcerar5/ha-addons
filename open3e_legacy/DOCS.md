@@ -28,6 +28,12 @@ The add-on exposes a terminal through Home Assistant ingress. Start the add-on a
 
 The terminal is intended for Open3e troubleshooting commands such as `open3e --help`, `open3e_depictSystem --help`, and inspecting files in `/data`. It is not a host shell.
 
+## Forcing a system re-depiction
+
+The generated depiction files in `/data` embed codec definitions from the time depiction last ran. After an add-on update that changes datapoint codecs, those files keep decoding with the old definitions until depiction re-runs. Depiction can take a long time, so it is not run automatically on updates.
+
+To force it: open the terminal, run `rm /data/.open3e-room-dids-*`, then restart the add-on. Depiction runs once during startup (before the MQTT listener claims the CAN bus) and the add-on continues normally afterwards.
+
 ## Finding which DID a hardware control writes
 
 A physical room control such as a **Vitotrol 300-E** talks to the heat pump over the same E3 CAN bus that Open3e uses. When you change a temperature on it, it writes a value to a datapoint (DID) on the bus. The `open3e_capture` helper finds that DID so it can later be exposed in Home Assistant as a writable entity.
