@@ -6,9 +6,11 @@ RUN apk update && apk add --no-cache bash git iproute2 nginx ttyd
 RUN mkdir -p /data /run/nginx
 WORKDIR /data
 
-# Pinned upstream develop (2026-08): includes the O3ESwitch ZigBee room device
-# codec (per-device-type decode) that fixes wrong ActualTemperature values.
-RUN pip install "open3e @ git+https://github.com/open3e/open3e.git@2375e95e3f274d6c828d05d13e5227964c1e5f2f"
+# Pinned upstream develop 2026-10-22, open3e 0.7.10: O3ESwitch ZigBee room
+# device codec plus decoded ConnectionState and Hardware-Version, and the
+# sub-write fix (flag_binary reset, length check). Deliberately before 0.7.11:
+# its corrected OpStates enum changes the bytes of the HVAC-mode write.
+RUN pip install "open3e @ git+https://github.com/open3e/open3e.git@756237b830419ec6dfb6a9f88362228f55d44044"
 
 COPY patch-open3e-vdens.py /tmp/patch-open3e-vdens.py
 RUN python /tmp/patch-open3e-vdens.py

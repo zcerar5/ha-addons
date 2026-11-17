@@ -47,7 +47,7 @@ In this add-on the legacy `open3e --listen` listener holds the CAN bus, so first
 
 The diff lists every datapoint that changed, temperature-like entries first; the one matching the value you dialled in is the write target. By default a snapshot reads only temperature/setpoint-like datapoints; add `--all` to both snapshots if the diff shows nothing. Snapshots are saved under `/data/open3e_captures/`.
 
-This fork installs Open3e from upstream `develop` for the classic MQTT add-on and exposes ViCare/ZigBee room device current values in the Vitocal/Vcal and Vitodens/Vdens profiles. That lets the Open3e HACS integration create room temperature and humidity entities when those datapoints are present on the bus.
+This fork installs Open3e from a pinned upstream `develop` commit (currently Open3e 0.7.10, `756237b`; see the Dockerfile) for the classic MQTT add-on and exposes ViCare/ZigBee room device current values in the Vitocal/Vcal and Vitodens/Vdens profiles. That lets the Open3e HACS integration create room temperature and humidity entities when those datapoints are present on the bus.
 
 ## Support
 

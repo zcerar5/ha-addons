@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.13
+
+- Update Open3e from the August `develop` pin (0.7.7) to upstream `develop` of 22 Oct 2026 (0.7.10, commit `756237b`). The three patches (room DIDs, ZigBee payload flattening, Vitotrol decode) apply unchanged.
+- ZigBee room current values (DIDs 2086-2143 and 2262-2319): the first byte is now decoded as `ConnectionState` (`{ID, Text}`: 3 Connected, 5 Not reachable, 0 Empty slot) instead of the raw `Unknown_00` field. All other fields, including the flattened `ActualTemperature` and `Humidity`, are unchanged.
+- ZigBee device properties: `Hardware-Version` is decoded instead of the raw `Unknown2` field.
+- Writes to a single field of a DID now check the encoded length, and a failed write no longer leaves Open3e publishing raw values as bytes until restart.
+- DID 2428 renamed to `MixerThreeCircuitRoomEcoFunctionSettings` (typo fix), which changes its MQTT topic.
+- Not included yet on purpose: the corrected `OpStates`/`Errors` enums of Open3e 0.7.11 and later. Open3e encodes enum fields by their text, and the HACS climate HVAC-mode write sends `State` as `No request`, which 0.7.11 moves from 12 to 255. The write would then send `0xFF` instead of today's `0x0C` in the `State` byte of DIDs 1415-1418, which is not yet verified on a Vitocal 222-S. This pin keeps that write byte-identical.
+- The system depiction runs once on the first start after this update (new marker `/data/.open3e-room-dids-0.6.13`), so the first start takes a few minutes.
+
 ## 0.6.12
 
 - Revert the 0.6.11 behavior of re-running the (long) system depiction on every add-on update.

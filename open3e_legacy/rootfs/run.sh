@@ -44,7 +44,7 @@ fi
 #   rm /data/.open3e-room-dids-*
 # and restart the add-on. Bump the marker name in a release only when that
 # release requires re-depiction for everyone.
-ROOM_DID_DISCOVERY_MARKER="/data/.open3e-room-dids-0.6.8"
+ROOM_DID_DISCOVERY_MARKER="/data/.open3e-room-dids-0.6.13"
 
 if ! test -f /data/devices.json || ! test -f "$ROOM_DID_DISCOVERY_MARKER"; then
    bashio::log.info "Running open3e_depictSystem -c $CAN ... This may take a while"
