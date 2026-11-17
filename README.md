@@ -2,10 +2,9 @@
 
 Home Assistant add-on repository for running Open3e with a CAN adapter and MQTT.
 
-Included add-ons:
+Included add-on:
 
-- **Open3e**: stable Open3e add-on.
-- **Open3e Develop**: test add-on that installs Open3e from the upstream `develop` branch.
+- **Open3e Legacy**: classic Open3e MQTT listener for the Open3e HACS integration, installing Open3e from a pinned upstream `develop` commit. The Supervisor builds it locally from this repository.
 
 [![Open your Home Assistant instance and show the add-on repository dialog with this repository pre-filled.](https://my.home-assistant.io/badges/supervisor_addon_store.svg)](https://my.home-assistant.io/redirect/supervisor_addon_store/?repository_url=https%3A%2F%2Fgithub.com%2Fzcerar5%2Fha-addons)
 
@@ -19,6 +18,6 @@ Included add-ons:
    https://github.com/zcerar5/ha-addons
    ```
 
-4. Install the **Open3e** add-on.
+4. Install the **Open3e Legacy** add-on.
 
 Add-ons require Home Assistant OS or a Home Assistant Supervised installation.
